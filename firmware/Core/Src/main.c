@@ -59,7 +59,30 @@ int _write(int file, char *ptr, int len)
 		ITM_SendChar((*ptr++));
 	return len;
 }
+void CanSend(uint32_t id)
+{
+	CAN_TxHeaderTypeDef   TxHeader;
+	CAN_RxHeaderTypeDef   RxHeader;
+	uint8_t               TxData[8];
 
+	uint32_t              TxMailbox;
+	  /*##-4- Start the Transmission process #####################################*/
+	  TxHeader.StdId =id;
+	  TxHeader.RTR = CAN_RTR_DATA;
+	  TxHeader.IDE = CAN_ID_STD;
+	  TxHeader.DLC = 2;
+	  TxHeader.TransmitGlobalTime = DISABLE;
+	  TxData[0] = 0xCA;
+	  TxData[1] = 0xFE;
+
+	  /* Request transmission */
+	//  if(HAL_CAN_AddTxMessage(hcan, TxHeader, aData, pTxMailbox)(hcan, TxMailboxes), TxMailboxes))
+	  if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, &TxData, &TxMailbox) != HAL_OK)
+	  {
+	    /* Transmission request Error */
+		  printf("can send error\n");
+	  }
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -114,6 +137,7 @@ int main(void)
   {
 	  HAL_Delay(200);
 	  printf("hello\n");
+		 CanSend(0x11);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
