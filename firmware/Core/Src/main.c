@@ -103,6 +103,7 @@ void SetDirection(bool dir)
 	GPIOB->ODR &=~(1<<12);
 	if(dir)GPIOB->ODR |=(1<<12);
 }
+//value is between 0 to 5
 void SelectDriver(uint8_t value)
 {
 	value&=0x07;
@@ -148,7 +149,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  SelectDriver(0);
+  SelectDriver(5);
   if (HAL_CAN_Start(&hcan) != HAL_OK)
      {
        /* Start Error */
@@ -168,11 +169,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+	  TIM4->CCR3=1900;
   printf("start\n");
   while (1)
   {
-	  HAL_Delay(200);
+	  HAL_Delay(4000);
 	  printf("hello\n");
+	  SetDirection(0);
+	  HAL_Delay(4000);
+	  SetDirection(1);
 
 //		 CanSend(i++);
     /* USER CODE END WHILE */
