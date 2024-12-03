@@ -59,6 +59,7 @@ uint8_t config[2];
 uint8_t comp[32];
 uint8_t _sensorID[7];
 int i;
+float tfloat;
 volatile int temperature_raw, pressure_raw, humidity_raw = 0;
 int finaltemp = 0;
 uint32_t finalpressure, final_humidity = 0;
@@ -488,13 +489,38 @@ int main(void)
 
 	  TIM4->CCR3=1900;
   printf("start\n");
+	for(i=0;i<6;i++)
+	{
+		init(i+1);
+		HAL_Delay(100);
+	}
   while (1)
   {
-	  HAL_Delay(4000);
-	  printf("hello\n");
-	  SetDirection(0);
-	  HAL_Delay(4000);
-	  SetDirection(1);
+//	  HAL_Delay(4000);
+//	  printf("hello\n");
+//	  SetDirection(0);
+//	  HAL_Delay(4000);
+//	  SetDirection(1);
+	  for(i=0;i<6;i++){
+	  			tfloat= readTemperature(i+1);
+
+	  			tfloat*=10;
+	  			finaltemp=tfloat;
+
+	  			tfloat=readPressure(i+1);
+	  			tfloat*=10;
+	  			p_fine=tfloat;
+
+
+	  			printf("sensor:%d pressure=%f  temp=%f \n",i+1,readPressure(i+1),readTemperature(i+1));
+	  			finaltemp=0;
+	  			finalpressure=0;
+	  			final_humidity=0;
+	  			HAL_Delay(10);
+
+	  		}
+
+
 
 //		 CanSend(i++);
     /* USER CODE END WHILE */
