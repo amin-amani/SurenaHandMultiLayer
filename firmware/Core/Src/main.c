@@ -101,7 +101,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 //	__NOP();
-	  printf("adc=%d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4]);
+	  printf("adc=%d %d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4],ADCResult[5]);
 
 }
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -519,7 +519,7 @@ int main(void)
 //	  SetDirection(0);
 //	  HAL_Delay(4000);
 //	  SetDirection(1);
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 5);
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
 	  for(i=0;i<6;i++){
 	  			tfloat= readTemperature(i+1);
 
