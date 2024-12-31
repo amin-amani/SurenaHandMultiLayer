@@ -60,6 +60,7 @@ uint8_t result=0;
 uint8_t tempread[8];
 uint8_t config[2];
 uint8_t comp[32];
+uint16_t ADCResult[5];
 uint8_t _sensorID[7];
 int i;
 float tfloat;
@@ -92,6 +93,16 @@ int _write(int file, char *ptr, int len)
 	for(i=0 ; i<len ; i++)
 		ITM_SendChar((*ptr++));
 	return len;
+}
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	__NOP();
+}
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+//	__NOP();
+	  printf("adc=%d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4]);
+
 }
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -508,6 +519,7 @@ int main(void)
 //	  SetDirection(0);
 //	  HAL_Delay(4000);
 //	  SetDirection(1);
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 5);
 	  for(i=0;i<6;i++){
 	  			tfloat= readTemperature(i+1);
 
@@ -519,7 +531,7 @@ int main(void)
 	  			p_fine=tfloat;
 
 
-	  			printf("sensor:%d pressure=%f  temp=%f \n",i+1,readPressure(i+1),readTemperature(i+1));
+//	  			printf("sensor:%d pressure=%f  temp=%f \n",i+1,readPressure(i+1),readTemperature(i+1));
 	  			finaltemp=0;
 	  			finalpressure=0;
 	  			final_humidity=0;
