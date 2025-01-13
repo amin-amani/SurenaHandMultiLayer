@@ -101,7 +101,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 //	__NOP();
-	  printf("adc=%d %d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4],ADCResult[5]);
+	//  printf("adc=%d %d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4],ADCResult[5]);
 
 }
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -150,9 +150,10 @@ void SelectDriver(uint8_t value)
 	GPIOB->ODR &=~(0x07<<13);
 	GPIOB->ODR |=(value<<13);
 }
-
+//minus means clockwise
 void set_motor_speed(uint8_t motor,int32_t speed )
 {
+
 
 	if(speed<0) {
 		SetDirection(0);
@@ -160,9 +161,11 @@ void set_motor_speed(uint8_t motor,int32_t speed )
 	}
 	else{
 	SetDirection(1);
+
 	}
+	speed=1900-speed;
 	if(speed>1900)speed=1900;
-	if(speed<100)speed =100;
+	if(speed<2)speed =2;
 
 	SelectDriver(motor);
 
@@ -462,6 +465,45 @@ bool init(int index)
 	HAL_Delay(100);
 	return true;
 }
+int CurrentPos=0;
+
+int TargetPoition=2048;
+void DoPID()
+{
+	float ki=0.00,kp=1,kd=0.00;
+
+	int error=0;
+	int intcmd;
+	int dt=10;
+	static int prevError=0;
+	float command=1200;
+	float Dterm=0;
+	static float Iterm=0;
+
+	CurrentPos=ADCResult[4];//UpdateEncoder();
+	printf("adc5=%d\n",CurrentPos);
+	error=TargetPoition-CurrentPos;
+	Dterm=(error-prevError)/dt;
+	Iterm+=(error)*dt;
+	if(Iterm>1200)Iterm=1200;
+	if(Iterm<-1200)Iterm=-1200;
+
+	command=kp*error+kd*Dterm+ki*Iterm;
+
+	prevError=error;
+		if(command>1900)command=1900;
+		if(command<-1900)	command=-1900;
+		intcmd=command;
+	printf("err=%d command=%d\n", error,intcmd);
+	 HAL_Delay(10);
+	//threshold
+//	if(command<300)command=300;
+//	if(command>2300)command=2300;
+
+		set_motor_speed(5, command);
+
+
+}
 
 /* USER CODE END PFP */
 
@@ -537,8 +579,8 @@ int main(void)
   while (1)
   {
 
-
-
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
+	  DoPID();
 
     /* USER CODE END WHILE */
 
