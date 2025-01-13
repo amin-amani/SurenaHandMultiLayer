@@ -74,6 +74,9 @@ signed short dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig
 bmp280_calib_data _bmp280_calib[7];
 int32_t t_fine;
 int32_t p_fine;
+int CurrentPos=0;
+
+int TargetPoition=2048;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,9 +113,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
   printf("header=%d \n",RxData[0]);
-	//if(RxHeader.StdId!=0x281)return;
+
+	if(RxHeader.StdId!=0x281)return;
 //	  SetServoPosition(RxData);
 //	  CanSend(0x12);
+  TargetPoition=RxData[0];
+  TargetPoition<<=8;
+  TargetPoition+=RxData[1];
+  printf("setpoint=%d\n",TargetPoition);
 }
 void CanSend(uint32_t id)
 {
@@ -137,6 +145,9 @@ void CanSend(uint32_t id)
 	    /* Transmission request Error */
 		  printf("can send error\n");
 	  }
+
+
+
 }
 void SetDirection(bool dir)
 {
@@ -465,9 +476,7 @@ bool init(int index)
 	HAL_Delay(100);
 	return true;
 }
-int CurrentPos=0;
 
-int TargetPoition=2048;
 void DoPID()
 {
 	float ki=0.00,kp=1,kd=0.00;
@@ -481,7 +490,14 @@ void DoPID()
 	static float Iterm=0;
 
 	CurrentPos=ADCResult[4];//UpdateEncoder();
-	printf("adc5=%d\n",CurrentPos);
+
+	if(CurrentPos<50 || CurrentPos>3900 )
+	{
+		set_motor_speed(7, 0);
+		return;
+	}
+
+//	printf("adc5=%d\n",CurrentPos);
 	error=TargetPoition-CurrentPos;
 	Dterm=(error-prevError)/dt;
 	Iterm+=(error)*dt;
@@ -494,7 +510,7 @@ void DoPID()
 		if(command>1900)command=1900;
 		if(command<-1900)	command=-1900;
 		intcmd=command;
-	printf("err=%d command=%d\n", error,intcmd);
+//	printf("err=%d command=%d\n", error,intcmd);
 	 HAL_Delay(10);
 	//threshold
 //	if(command<300)command=300;
