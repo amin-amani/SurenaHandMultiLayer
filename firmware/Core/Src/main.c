@@ -150,6 +150,27 @@ void SelectDriver(uint8_t value)
 	GPIOB->ODR &=~(0x07<<13);
 	GPIOB->ODR |=(value<<13);
 }
+
+void set_motor_speed(uint8_t motor,int32_t speed )
+{
+
+	if(speed<0) {
+		SetDirection(0);
+		speed*=-1;
+	}
+	else{
+	SetDirection(1);
+	}
+	if(speed>1900)speed=1900;
+	if(speed<100)speed =100;
+
+	SelectDriver(motor);
+
+	 TIM4->CCR3=speed;
+
+
+
+}
 void SelectSensor(int8_t index)
 {
 
@@ -512,36 +533,13 @@ int main(void)
 		init(i+1);
 		HAL_Delay(100);
 	}
+	  set_motor_speed(5,-100);
   while (1)
   {
-//	  HAL_Delay(4000);
-//	  printf("hello\n");
-//	  SetDirection(0);
-//	  HAL_Delay(4000);
-//	  SetDirection(1);
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
-	  for(i=0;i<6;i++){
-	  			tfloat= readTemperature(i+1);
-
-	  			tfloat*=10;
-	  			finaltemp=tfloat;
-
-	  			tfloat=readPressure(i+1);
-	  			tfloat*=10;
-	  			p_fine=tfloat;
-
-
-//	  			printf("sensor:%d pressure=%f  temp=%f \n",i+1,readPressure(i+1),readTemperature(i+1));
-	  			finaltemp=0;
-	  			finalpressure=0;
-	  			final_humidity=0;
-	  			HAL_Delay(10);
-
-	  		}
 
 
 
-//		 CanSend(i++);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
