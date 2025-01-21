@@ -7,8 +7,11 @@
 
 #ifndef INC_LOGIC_H_
 #define INC_LOGIC_H_
-
-
+#include <stdint.h>
+void register_adc_callback(void (*read_adc_callback)(uint32_t* data, uint32_t length) );
+void register_delay(void (*delay_callback)(uint32_t delay));
+void register_finger_motros_callback(void (*set_finger_position_callback)(uint8_t motor,int32_t speed));
 void logic_start();
 void logic_loop();
+void can_data_received(uint32_t id,uint8_t*data);
 #endif /* INC_LOGIC_H_ */

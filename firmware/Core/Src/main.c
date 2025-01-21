@@ -24,7 +24,8 @@
 #include <stdbool.h>
 #include<stdio.h>
 #include "BME.h"
-
+#include <string.h>
+#include "Logic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +61,7 @@ uint8_t result=0;
 uint8_t tempread[8];
 uint8_t config[2];
 uint8_t comp[32];
-uint16_t ADCResult[5];
+uint16_t ADCResult[6];
 uint8_t _sensorID[7];
 int i;
 float tfloat;
@@ -74,9 +75,7 @@ signed short dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig
 bmp280_calib_data _bmp280_calib[7];
 int32_t t_fine;
 int32_t p_fine;
-int CurrentPos=0;
 
-int TargetPoition=2048;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,10 +116,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	if(RxHeader.StdId!=0x281)return;
 //	  SetServoPosition(RxData);
 //	  CanSend(0x12);
-  TargetPoition=RxData[0];
-  TargetPoition<<=8;
-  TargetPoition+=RxData[1];
-  printf("setpoint=%d\n",TargetPoition);
+//  TargetPoition=RxData[0];
+//  TargetPoition<<=8;
+//  TargetPoition+=RxData[1];
+//  printf("setpoint=%d\n",TargetPoition);
+	can_data_received(RxHeader.StdId,RxData);
+
+
 }
 void CanSend(uint32_t id)
 {
@@ -477,50 +479,59 @@ bool init(int index)
 	return true;
 }
 
-void DoPID()
+//void DoPID()
+//{
+//	float ki=0.00,kp=1,kd=0.00;
+//
+//	int error=0;
+//	int intcmd;
+//	int dt=10;
+//	static int prevError=0;
+//	float command=1200;
+//	float Dterm=0;
+//	static float Iterm=0;
+//
+//	CurrentPos=ADCResult[4];//UpdateEncoder();
+//
+//	if(CurrentPos<50 || CurrentPos>3900 )
+//	{
+//		set_motor_speed(7, 0);
+//		return;
+//	}
+//
+////	printf("adc5=%d\n",CurrentPos);
+//	error=TargetPoition-CurrentPos;
+//	Dterm=(error-prevError)/dt;
+//	Iterm+=(error)*dt;
+//	if(Iterm>1200)Iterm=1200;
+//	if(Iterm<-1200)Iterm=-1200;
+//
+//	command=kp*error+kd*Dterm+ki*Iterm;
+//
+//	prevError=error;
+//		if(command>1900)command=1900;
+//		if(command<-1900)	command=-1900;
+//		intcmd=command;
+////	printf("err=%d command=%d\n", error,intcmd);
+//	 HAL_Delay(10);
+//	//threshold
+////	if(command<300)command=300;
+////	if(command>2300)command=2300;
+//
+//		set_motor_speed(5, command);
+//
+//
+//}
+
+void hal_read_adc(uint32_t * data, uint32_t length)
 {
-	float ki=0.00,kp=1,kd=0.00;
 
-	int error=0;
-	int intcmd;
-	int dt=10;
-	static int prevError=0;
-	float command=1200;
-	float Dterm=0;
-	static float Iterm=0;
-
-	CurrentPos=ADCResult[4];//UpdateEncoder();
-
-	if(CurrentPos<50 || CurrentPos>3900 )
-	{
-		set_motor_speed(7, 0);
-		return;
-	}
-
-//	printf("adc5=%d\n",CurrentPos);
-	error=TargetPoition-CurrentPos;
-	Dterm=(error-prevError)/dt;
-	Iterm+=(error)*dt;
-	if(Iterm>1200)Iterm=1200;
-	if(Iterm<-1200)Iterm=-1200;
-
-	command=kp*error+kd*Dterm+ki*Iterm;
-
-	prevError=error;
-		if(command>1900)command=1900;
-		if(command<-1900)	command=-1900;
-		intcmd=command;
-//	printf("err=%d command=%d\n", error,intcmd);
-	 HAL_Delay(10);
-	//threshold
-//	if(command<300)command=300;
-//	if(command>2300)command=2300;
-
-		set_motor_speed(5, command);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, length);
+	memcpy(data,ADCResult,length);
+//	printf("adc=%d %d %d %d %d %d\n",adc_values[0],adc_values[1],adc_values[2],adc_values[3],adc_values[4],adc_values[5]);
 
 
 }
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -583,7 +594,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	 register_adc_callback(hal_read_adc);
+	 register_delay(HAL_Delay);
+	 register_finger_motros_callback(set_motor_speed);
 	 logic_start();
+
 	  TIM4->CCR3=1900;
   printf("start\n");
 	for(i=0;i<6;i++)
@@ -592,11 +607,12 @@ int main(void)
 		HAL_Delay(100);
 	}
 	  set_motor_speed(5,-100);
+//	 set_motor_speed(5,1900);
   while (1)
   {
-	  logic_loop();
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
-	  DoPID();
+	 logic_loop();
+
+//	  DoPID();
 
     /* USER CODE END WHILE */
 
