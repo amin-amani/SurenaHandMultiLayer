@@ -583,7 +583,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
+	 logic_start();
 	  TIM4->CCR3=1900;
   printf("start\n");
 	for(i=0;i<6;i++)
@@ -594,7 +594,7 @@ int main(void)
 	  set_motor_speed(5,-100);
   while (1)
   {
-
+	  logic_loop();
 	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
 	  DoPID();
 

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(RunAllTests LANGUAGES C)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-file(GLOB SRC_COMMON  ${CMAKE_SOURCE_DIR}/Core/Src/*.c)
+file(GLOB SRC_COMMON  ${CMAKE_SOURCE_DIR}/Core/Src/*.c )
 list(REMOVE_ITEM SRC_COMMON
     ${CMAKE_SOURCE_DIR}/Core/Src/main.c
     ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
@@ -28,6 +28,7 @@ message("==================${CMAKE_SOURCE_DIR}")
 file(GLOB SRC_TEST ${CMAKE_SOURCE_DIR}/test/*.c )
 include_directories(
 ${CMAKE_SOURCE_DIR}/lib/Unity/src/
+ ${CMAKE_SOURCE_DIR}/Core/Inc
 )
 
 add_executable(${PROJECT_NAME} ${SRC_TEST}  ${SRC_COMMON})
