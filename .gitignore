@@ -4,3 +4,5 @@ pcb/__Previews
 pcb/History
 firmware/Debug
 *.log
+build-*
+*.user
