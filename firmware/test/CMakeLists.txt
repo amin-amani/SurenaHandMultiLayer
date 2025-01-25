@@ -28,7 +28,7 @@ message("==================${CMAKE_SOURCE_DIR}")
 file(GLOB SRC_TEST ${CMAKE_SOURCE_DIR}/test/*.c )
 include_directories(
 ${CMAKE_SOURCE_DIR}/lib/Unity/src/
- ${CMAKE_SOURCE_DIR}/Core/Inc
+${CMAKE_SOURCE_DIR}/Core/Inc
 )
 
 add_executable(${PROJECT_NAME} ${SRC_TEST}  ${SRC_COMMON})

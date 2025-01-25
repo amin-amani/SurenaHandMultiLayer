@@ -4,7 +4,7 @@
  *  Created on: Jan 21, 2025
  *      Author: amin
  */
-#include "logic.h"
+#include "Logic.h"
 
 uint32_t adc_values[6];
 int CurrentPos=0;

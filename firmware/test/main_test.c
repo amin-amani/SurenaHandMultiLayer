@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "../Core/Inc/logic.h"
+#include "Logic.h"
 #include "string.h"
 #include<unistd.h>
 
