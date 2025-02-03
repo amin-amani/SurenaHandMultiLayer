@@ -2,6 +2,7 @@
 #include "Logic.h"
 #include "string.h"
 #include<unistd.h>
+#include "pid.h"
 
 void read_adc_mock(uint32_t * data, uint32_t length)
 {
@@ -10,10 +11,12 @@ void read_adc_mock(uint32_t * data, uint32_t length)
 
 }
 
+
 void test_main_logic()
 {
 
 }
+
 
 
 void setUp (void)
@@ -27,7 +30,6 @@ int main()
     UNITY_BEGIN();
 
     RUN_TEST(test_main_logic);
-
 
     return UNITY_END();
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(RunAllTests LANGUAGES C)
+project(logic_test LANGUAGES C)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 file(GLOB SRC_COMMON  ${CMAKE_SOURCE_DIR}/Core/Src/*.c )
@@ -24,8 +24,8 @@ add_compile_definitions(UNIT_TESTING)
 #     ${CMAKE_SOURCE_DIR}/Core/Inc/bsp.h
 
 #     )
-message("==================${CMAKE_SOURCE_DIR}")
-file(GLOB SRC_TEST ${CMAKE_SOURCE_DIR}/test/*.c )
+message("==================${CMAKE_SOURCE_DIR}/Core/Inc")
+file(GLOB SRC_TEST ${CMAKE_SOURCE_DIR}/test/logic/*.c )
 include_directories(
 ${CMAKE_SOURCE_DIR}/lib/Unity/src/
 ${CMAKE_SOURCE_DIR}/Core/Inc
