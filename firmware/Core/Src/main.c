@@ -151,6 +151,29 @@ void CanSend(uint32_t id)
 
 
 }
+uint8_t CanSendArray(uint32_t id,uint8_t *data, uint32_t len)
+{
+	CAN_TxHeaderTypeDef   TxHeader;
+	uint32_t              TxMailbox;
+	  /*##-4- Start the Transmission process #####################################*/
+	  TxHeader.StdId =id;
+	  TxHeader.RTR = CAN_RTR_DATA;
+	  TxHeader.IDE = CAN_ID_STD;
+	  TxHeader.DLC = 2;
+	  TxHeader.TransmitGlobalTime = DISABLE;
+
+	  /* Request transmission */
+	//  if(HAL_CAN_AddTxMessage(hcan, TxHeader, aData, pTxMailbox)(hcan, TxMailboxes), TxMailboxes))
+	  if(HAL_CAN_AddTxMessage(&hcan, &TxHeader,data, &TxMailbox) != HAL_OK)
+	  {
+	    /* Transmission request Error */
+		  return 1;
+	  }
+	  return 0;
+
+
+
+}
 void SetDirection(bool dir)
 {
 	GPIOB->ODR &=~(1<<12);
@@ -597,6 +620,7 @@ int main(void)
 	 register_adc_callback(hal_read_adc);
 	 register_delay(HAL_Delay);
 	 register_finger_motros_callback(set_motor_speed);
+	 register_can_send(CanSendArray);
 	 logic_start();
 
 	  TIM4->CCR3=1900;

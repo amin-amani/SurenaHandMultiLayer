@@ -6,9 +6,11 @@
  */
 #include "Logic.h"
 #include "pid.h"
+
 void (*set_finger_position)(uint8_t motor,int32_t speed);
 void (*read_adc)(uint32_t* data, uint32_t length);
 void (*delay_ms)(uint32_t delay);
+uint8_t (*can_send)(uint32_t id,uint8_t *data, uint32_t len);
 uint32_t adc_values[6];
 
 
@@ -58,7 +60,11 @@ void register_adc_callback(void (*read_adc_callback)(uint32_t* data, uint32_t le
 	read_adc=read_adc_callback;
 }
 
+void  register_can_send(uint8_t (*can_send_callback)(uint32_t id,uint8_t *data, uint32_t len))
+{
+can_send=can_send_callback;
 
+}
 
 void can_data_received(uint32_t id,uint8_t*data)
 {
