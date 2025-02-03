@@ -549,7 +549,7 @@ bool init(int index)
 void hal_read_adc(uint32_t * data, uint32_t length)
 {
 
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, length);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, length*sizeof(uint32_t));
 	memcpy(data,ADCResult,length);
 //	printf("adc=%d %d %d %d %d %d\n",adc_values[0],adc_values[1],adc_values[2],adc_values[3],adc_values[4],adc_values[5]);
 

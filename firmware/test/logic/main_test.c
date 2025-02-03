@@ -7,7 +7,7 @@
 void read_adc_mock(uint32_t * data, uint32_t length)
 {
     uint16_t ADCResult[6]={1,2,3,4,5,6};
-    memcpy(data,ADCResult,length);
+    memcpy(data,ADCResult,length*sizeof (uint32_t));
 
 }
 
