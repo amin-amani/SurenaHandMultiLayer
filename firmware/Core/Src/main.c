@@ -115,7 +115,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void CanSend(uint32_t id)
 {
 	CAN_TxHeaderTypeDef   TxHeader;
-	CAN_RxHeaderTypeDef   RxHeader;
 	uint8_t               TxData[8];
 
 	uint32_t              TxMailbox;
@@ -280,13 +279,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	 register_adc_callback(hal_read_adc);
-	 register_delay(HAL_Delay);
-	 register_finger_motros_callback(set_motor_speed);
 	 register_spi_transmit_function(hal_spi_transmit);
 	 register_spi_receive_function(hal_spi_receive);
+	 register_adc_callback(hal_read_adc);
+	 register_delay(HAL_Delay);
+	 register_read_pressure(readPressure);
+	 register_finger_motros_callback(set_motor_speed);
 	 register_can_send(CanSendArray);
 	 logic_start();
+
 
 	  TIM4->CCR3=1900;
   printf("start\n");

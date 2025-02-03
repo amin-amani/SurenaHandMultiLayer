@@ -10,6 +10,7 @@
 void (*set_finger_position)(uint8_t motor,int32_t speed);
 void (*read_adc)(uint32_t* data, uint32_t length);
 void (*delay_ms)(uint32_t delay);
+float (*read_pressure)(int index);
 uint8_t (*can_send)(uint32_t id,uint8_t *data, uint32_t len);
 uint32_t adc_values[6];
 
@@ -64,6 +65,10 @@ void  register_can_send(uint8_t (*can_send_callback)(uint32_t id,uint8_t *data, 
 {
 can_send=can_send_callback;
 
+}
+void register_read_pressure(float (*read_pressure_callback)(int index))
+{
+	read_pressure=read_pressure_callback;
 }
 
 void can_data_received(uint32_t id,uint8_t*data)

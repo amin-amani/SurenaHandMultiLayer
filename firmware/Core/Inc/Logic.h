@@ -14,5 +14,6 @@ void register_finger_motros_callback(void (*set_finger_position_callback)(uint8_
 void logic_start();
 void logic_loop();
 void can_data_received(uint32_t id,uint8_t*data);
-void  register_can_send(uint8_t (*can_send_callback)(uint32_t id,uint8_t *data, uint32_t len));
+void register_can_send(uint8_t (*can_send_callback)(uint32_t id,uint8_t *data, uint32_t len));
+void register_read_pressure(float (*read_pressure_callback)(int index));
 #endif /* INC_LOGIC_H_ */
