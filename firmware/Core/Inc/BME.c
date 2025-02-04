@@ -258,6 +258,7 @@ float readPressure(int index)
 	var2 = (((int64_t)_bmp280_calib[index].dig_P8) * p) >> 19;
 
 	p = ((p + var1 + var2) >> 8) + (((int64_t)_bmp280_calib[index].dig_P7) << 4);
+
 	return (float)p / 256;
 }
 void BME280_CALC_FINAL_VALS(){

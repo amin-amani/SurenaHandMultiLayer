@@ -295,6 +295,17 @@ int main(void)
 //	 set_motor_speed(5,1900);
   while (1)
   {
+//	  float tfloat,finaltemp;
+//	  for(i=0;i<6;i++){
+//
+//
+//
+//	  			printf("sensor:%d pressure=%f  temp=%f \n",i+1,readPressure(i+1),readTemperature(i+1));
+//
+//	  			HAL_Delay(10);
+//
+//	  		}
+
 	 logic_loop();
 
 //	  DoPID();
