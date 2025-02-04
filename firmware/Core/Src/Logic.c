@@ -40,7 +40,8 @@ void logic_loop()
 {
 	read_adc(adc_values,6);
     set_finger_position(5, do_pid(1200,adc_values[4],&pid_element[4]));
-	delay_ms(10);
+	delay_ms(20);
+
 
 }
 
@@ -73,6 +74,7 @@ void register_read_pressure(float (*read_pressure_callback)(int index))
 
 void can_data_received(uint32_t id,uint8_t*data)
 {
-
+printf("id=%d %d %d %d %d %d %d %d %\n",id,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+can_send(id+1,data,8);
 }
 

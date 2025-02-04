@@ -99,15 +99,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t               RxData[8];
 	CAN_RxHeaderTypeDef   RxHeader;
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-  printf("header=%d \n",RxData[0]);
-
-	if(RxHeader.StdId!=0x281)return;
-//	  SetServoPosition(RxData);
-//	  CanSend(0x12);
-//  TargetPoition=RxData[0];
-//  TargetPoition<<=8;
-//  TargetPoition+=RxData[1];
-//  printf("setpoint=%d\n",TargetPoition);
 	can_data_received(RxHeader.StdId,RxData);
 
 
@@ -146,7 +137,7 @@ uint8_t CanSendArray(uint32_t id,uint8_t *data, uint32_t len)
 	  TxHeader.StdId =id;
 	  TxHeader.RTR = CAN_RTR_DATA;
 	  TxHeader.IDE = CAN_ID_STD;
-	  TxHeader.DLC = 2;
+	  TxHeader.DLC = len;
 	  TxHeader.TransmitGlobalTime = DISABLE;
 
 	  /* Request transmission */
@@ -210,9 +201,13 @@ uint8_t hal_spi_receive(uint8_t* data, uint16_t len, uint32_t timeout)
 
 void hal_read_adc(uint32_t * data, uint32_t length)
 {
-
+	int i;
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, length*sizeof(uint32_t));
-	memcpy(data,ADCResult,length);
+
+	for(i=0;i<6;i++)
+	data[i]=ADCResult[i];
+
+	//memcpy(data,ADCResult,length);
 //	printf("adc=%d %d %d %d %d %d\n",adc_values[0],adc_values[1],adc_values[2],adc_values[3],adc_values[4],adc_values[5]);
 
 
