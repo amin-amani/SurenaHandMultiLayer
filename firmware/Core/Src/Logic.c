@@ -13,7 +13,7 @@ void (*delay_ms)(uint32_t delay);
 float (*read_pressure)(int index);
 uint8_t (*can_send)(uint32_t id,uint8_t *data, uint32_t len);
 uint32_t adc_values[6];
-
+float sensor_result=0;
 
 pid_element_type pid_element[6];
 
@@ -41,9 +41,9 @@ void logic_loop()
 	read_adc(adc_values,6);
     set_finger_position(5, do_pid(1200,adc_values[4],&pid_element[4]));
 	delay_ms(20);
-	printf("%f\n",read_pressure(1));
+//	printf("%f\n",read_pressure(1));
 
-
+	sensor_result=read_pressure(1);
 
 
 }
@@ -77,7 +77,19 @@ void register_read_pressure(float (*read_pressure_callback)(int index))
 
 void can_data_received(uint32_t id,uint8_t*data)
 {
-printf("id=%d %d %d %d %d %d %d %d %\n",id,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
-can_send(id+1,data,8);
+
+
+	if(id!=0x281)return;
+	printf("id=%d %d %d %d %d %d %d %d %\n",id,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+
+if(data[0]==0x06){
+
+	data[1]=sensor_result;
+
+	can_send(id+1,data,8);
 }
+
+
+}
+
 
