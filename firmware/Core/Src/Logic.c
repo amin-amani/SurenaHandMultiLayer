@@ -37,12 +37,11 @@ pid_element[4].min_output=-1900;
 }
 
 void logic_loop()
-{int i;
+{
 	read_adc(adc_values,6);
     set_finger_position(5, do_pid(1200,adc_values[4],&pid_element[4]));
 	delay_ms(20);
-	i=0;
-	printf("%d %f\n", i+1,read_pressure(i+1));
+	printf("%f\n",read_pressure(1));
 
 
 
