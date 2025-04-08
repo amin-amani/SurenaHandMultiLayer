@@ -8,6 +8,14 @@
 #ifndef INC_LOGIC_H_
 #define INC_LOGIC_H_
 #include <stdint.h>
+
+#define FINGER_1 1
+#define FINGER_2 2
+#define FINGER_3 3
+#define FINGER_4 4
+#define FINGER_5 5
+#define FINGER_6 6
+
 void register_adc_callback(void (*read_adc_callback)(uint32_t* data, uint32_t length) );
 void register_delay(void (*delay_callback)(uint32_t delay));
 void register_finger_motros_callback(void (*set_finger_position_callback)(uint8_t motor,int32_t speed));
