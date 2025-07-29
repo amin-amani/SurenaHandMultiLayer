@@ -595,11 +595,11 @@ int main(void)
 //	 SetDirection();
   while (1)
   {
-
-	  set_motor_speed(1,-100);
-	  HAL_Delay(2000);
-	  set_motor_speed(1,100);
-	  HAL_Delay(2000);
+//0--index
+	  set_motor_speed(1,-420);
+	  HAL_Delay(3000);
+	  set_motor_speed(1,+420);
+	  HAL_Delay(3000);
 //	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
 //	  DoPID();
 
