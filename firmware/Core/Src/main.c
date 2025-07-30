@@ -29,10 +29,14 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+#define INDEX_FINGER 0
+#define PINKY_FINGER 3
+#define RING_FINGER 2
 
+#define PINKY_FINGER_LIMIT_CLOSE 1994
+#define PINKY_FINGER_LIMIT_OPEN 2866
 /* USER CODE END PTD */
 
-/* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
 /* USER CODE END PD */
@@ -76,7 +80,7 @@ int32_t t_fine;
 int32_t p_fine;
 int CurrentPos=0;
 
-int TargetPoition=2048;
+int TargetPoition=2400;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,7 +108,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 //	__NOP();
-	//  printf("adc=%d %d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4],ADCResult[5]);
+	  printf("adc=%d %d %d %d %d %d\n",ADCResult[0],ADCResult[1],ADCResult[2],ADCResult[3],ADCResult[4],ADCResult[5]);
 
 }
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -489,7 +493,7 @@ void DoPID()
 	float Dterm=0;
 	static float Iterm=0;
 
-	CurrentPos=ADCResult[4];//UpdateEncoder();
+	CurrentPos=ADCResult[1];//UpdateEncoder();
 
 	if(CurrentPos<50 || CurrentPos>3900 )
 	{
@@ -516,7 +520,7 @@ void DoPID()
 //	if(command<300)command=300;
 //	if(command>2300)command=2300;
 
-		set_motor_speed(5, command);
+		set_motor_speed(PINKY_FINGER, command);
 
 
 }
@@ -596,12 +600,13 @@ int main(void)
   while (1)
   {
 //0--index
-	  set_motor_speed(1,-420);
-	  HAL_Delay(3000);
-	  set_motor_speed(1,+420);
-	  HAL_Delay(3000);
-//	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
-//	  DoPID();
+//	  set_motor_speed(PINKY_FINGER,+420); //+ open
+//	  HAL_Delay(5000);
+//	  set_motor_speed(PINKY_FINGER,-420);
+//	  HAL_Delay(5000);
+	 // set_motor_speed(PINKY_FINGER,0);
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
+	  DoPID();
 
     /* USER CODE END WHILE */
 
