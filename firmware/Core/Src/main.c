@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ADC_CHANNEL_COUNT (6)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -59,7 +59,7 @@ int i=0;
 int val=0;
 uint8_t result=0;
 
-uint16_t ADCResult[6];
+uint16_t ADCResult[ADC_CHANNEL_COUNT];
 
 int i;
 
@@ -202,8 +202,6 @@ uint8_t hal_spi_receive(uint8_t* data, uint16_t len, uint32_t timeout)
 void hal_read_adc(uint32_t * data, uint32_t length)
 {
 	int i;
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, length*sizeof(uint32_t));
-
 	for(i=0;i<6;i++)
 	data[i]=ADCResult[i];
 
@@ -225,6 +223,7 @@ void hal_read_adc(uint32_t * data, uint32_t length)
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -254,6 +253,7 @@ int main(void)
   MX_SPI1_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult , ADC_CHANNEL_COUNT * sizeof(uint32_t));
   SelectDriver(5);
   if (HAL_CAN_Start(&hcan) != HAL_OK)
      {
@@ -384,7 +384,7 @@ static void MX_ADC1_Init(void)
   */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
