@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -59,6 +59,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DIRVER_DIRECTION_Pin GPIO_PIN_12
+#define DIRVER_DIRECTION_GPIO_Port GPIOB
+#define DRIVER_SELECT0_Pin GPIO_PIN_13
+#define DRIVER_SELECT0_GPIO_Port GPIOB
+#define DRIVER_SELECT1_Pin GPIO_PIN_14
+#define DRIVER_SELECT1_GPIO_Port GPIOB
+#define DRIVER_SELECT2_Pin GPIO_PIN_15
+#define DRIVER_SELECT2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
