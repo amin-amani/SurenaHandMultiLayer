@@ -5,3 +5,11 @@ software/.vs/
 pcb/History
 firmware/Debug
 *.log
+software/*.XML
+*.exe
+*.pdb
+*.manifest
+software/usbcommand/bin/Release/
+software/usbcommand/obj/
+*.user
+
