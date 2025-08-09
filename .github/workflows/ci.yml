@@ -6,9 +6,9 @@ on:
   pull_request:
 
 env:
-  workspace_path: "/builds/raymon/electronics"
   stm32cubeIDE_path: "/opt/st/stm32cubeide_1.17.0/stm32cubeide"
-  project_name: "${{ github.event.repository.name }}"
+  firmware_path: "${{ github.workspace }}/firmware"
+  ws_path: "/home/ws/"
 
 jobs:
   build-job:
@@ -20,17 +20,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find STM32CubeIDE folder
+      - name: Show STM32CubeIDE and Firmware paths
         run: |
-          echo "build with STM32CubeIDE..."
+          echo "STM32CubeIDE Path: $stm32cubeIDE_path"
+          echo "Firmware Path: $firmware_path"
 
-          /opt/st/stm32cubeide_1.17.0/stm32cubeide \
-          --launcher.suppressErrors \
-          -nosplash \
-          -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
-          -build all \
-          -importAll /__w/SurenaHandMultiLayer/SurenaHandMultiLayer/firmware \
-          -data /home/ws/
+      - name: Build with STM32CubeIDE
+        run: |
+          "$stm32cubeIDE_path" \
+            --launcher.suppressErrors \
+            -nosplash \
+            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+            -build all \
+            -importAll "$firmware_path" \
+            -data "$ws_path"
 
 
-          
