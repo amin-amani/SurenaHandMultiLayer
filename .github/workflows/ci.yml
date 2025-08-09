@@ -11,8 +11,8 @@ env:
   project_name: "${{ github.event.repository.name }}"
 
 jobs:
-  pcb-check:
-    name: Check Hardware Structure
+  build-job:
+    name: Build Firmware
     runs-on: ubuntu-latest
     container:
       image: aminamani/ubuntu-raymon:22.04
@@ -20,136 +20,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Start hardware check
+      - name: Find STM32CubeIDE folder
         run: |
-          echo "start checking hardware"
-          # uname -a && pwd
-          # /update.sh
-          # ls / -la
-          # /ci_scripts/check_hardware_project.sh
-          # python3 /ci_scripts/pcb_struct_plot.py
-          # mkdir -p ${workspace_path}/${project_name}/artifacts 
-          # find / -iname "report.txt"
-          # # cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
-          # # cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
+          echo "Searching for STM32CubeIDE..."
+          find / -type d -iname "stm32cubeide*" 2>/dev/null
 
-      # - name: Setup SSH Keys
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.CI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-      #     echo "${{ secrets.CI_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
-      #     chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
-      #     ssh-keyscan hamgit.ir >> ~/.ssh/known_hosts
-      #     git config --global user.email "pipeline@pipeline.com"
-      #     git config --global user.name "pipeline"
-
-      # - name: Clone DevOps Dashboard
-      #   run: |
-      #     if [ -d "${workspace_path}/devopsdashboard" ]; then rm -r "${workspace_path}/devopsdashboard" && echo "removed old"; else echo "no old folder found"; fi
-      #     cd ${workspace_path} && git clone --depth=1 git@hamgit.ir:raymon/electronics/devopsdashboard.git
-
-      # - name: Update Dashboard
-      #   run: |
-      #     mkdir -p ${workspace_path}/devopsdashboard/${project_name}
-      #     touch ${workspace_path}/devopsdashboard/${project_name}/report.txt
-      #     touch ${workspace_path}/devopsdashboard/${project_name}/badge.md
-      #     cp ${workspace_path}/${project_name}/artifacts/* ${workspace_path}/devopsdashboard/${project_name}/
-      #     echo "${GITHUB_RUN_ID}" >> ${workspace_path}/devopsdashboard/${project_name}/report.txt
-      #     /ci_scripts/update-project.sh ${project_name} ${workspace_path}/devopsdashboard/README.md
-      #     cd ${workspace_path}/devopsdashboard
-      #     git add .
-      #     git diff --cached --quiet && echo "No changes to commit" || (git commit -m "update ${project_name} statics" && git push)
-
-  build-job:
-    name: Build Firmware
-    runs-on: ubuntu-latest
-    needs: pcb-check
-    container:
-      image: aminamani/ubuntu-raymon:22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check if firmware files exist
+      - name: Find firmware folder
         run: |
-          if [ ! -d "firmware" ] || [ -z "$(ls -A firmware 2>/dev/null)" ]; then
-            echo "No firmware files found. Skipping build."
-            exit 78
-          fi
-      - name: Build with STM32CubeIDE
-        run: |
-          mkdir -p /home/ws/
-          echo "Checking STM32CubeIDE installation..."
-          if [ ! -x "/opt/st/stm32cubeide_1.17.0/stm32cubeide" ]; then
-            echo "Error: STM32CubeIDE not found at /opt/st/stm32cubeide_1.17.0/stm32cubeide"
-            exit 1
-          fi
-          
-          echo "Starting STM32CubeIDE headless build..."
-          /opt/st/stm32cubeide_1.17.0/stm32cubeide \
-            --launcher.suppressErrors -nosplash \
-            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
-            -build all \
-            -importAll "${workspace_path}/${project_name}/firmware/" \
-            -data /home/ws/
-
-          echo "Build completed successfully."
-          cd firmware && ls -la
-
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: firmware-build
-          path: |
-            ${workspace_path}/${project_name}/firmware/Debug/
-            ${workspace_path}/${project_name}/firmware/Release/
-
-  test-job:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    needs: build-job
-    container:
-      image: aminamani/ubuntu-raymon:22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check if test files exist
-        run: |
-          if [ ! -d "firmware/test" ] || [ -z "$(ls -A firmware/test 2>/dev/null)" ]; then
-            echo "No firmware test files found. Skipping tests."
-            exit 78
-          fi
-
-      - name: Run Unit Tests
-        run: |
-          cd ${workspace_path}/${project_name}/firmware
-          mkdir build && cd build
-          cmake ..
-          make
-          ls test/ -la
-          if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
-          Xvfb :99 -screen 0 1366x768x24 &
-          make coverage_report
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: |
-            ${workspace_path}/${project_name}/firmware/build/coverage_report/
-            ${workspace_path}/${project_name}/firmware/build/coverage.info
-
-  release-job:
-    name: Release
-    runs-on: ubuntu-latest
-    needs: test-job
-    container:
-      image: aminamani/ubuntu-raymon:22.04
-    if: startsWith(github.event.head_commit.message, 'release:') && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Create Release
-        run: |
-          echo "Creating release..."
-          VERSION=$(echo "${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}" | sed -n 's/^release: *//p')
-          git tag -a "v$VERSION" -m "Release version $VERSION"
-          git push origin "v$VERSION"
+          echo "Searching for firmware folder..."
+          find / -type d -iname "firmware" 2>/dev/null
