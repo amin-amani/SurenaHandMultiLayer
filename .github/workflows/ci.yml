@@ -65,16 +65,28 @@ jobs:
     needs: pcb-check
     container:
       image: aminamani/ubuntu-raymon:22.04
-    if: ${{ hashFiles('firmware/*') != '' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check if firmware files exist
+        run: |
+          if [ ! -d "firmware" ] || [ -z "$(ls -A firmware 2>/dev/null)" ]; then
+            echo "No firmware files found. Skipping build."
+            exit 78
+          fi
+
       - name: Build with STM32CubeIDE
         run: |
           mkdir -p /home/ws/
           echo "Starting STM32CubeIDE headless build..."
-          $stm32cubeIDE_path --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -build all -importAll  ${workspace_path}/${project_name}/firmware/ -data /home/ws/
+          $stm32cubeIDE_path --launcher.suppressErrors -nosplash \
+            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+            -build all \
+            -importAll  ${workspace_path}/${project_name}/firmware/ \
+            -data /home/ws/
           echo "Build completed successfully."
           cd firmware && ls -la
+
       - uses: actions/upload-artifact@v4
         with:
           name: firmware-build
@@ -88,9 +100,16 @@ jobs:
     needs: build-job
     container:
       image: aminamani/ubuntu-raymon:22.04
-    if: ${{ hashFiles('firmware/test/*') != '' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check if test files exist
+        run: |
+          if [ ! -d "firmware/test" ] || [ -z "$(ls -A firmware/test 2>/dev/null)" ]; then
+            echo "No firmware test files found. Skipping tests."
+            exit 78
+          fi
+
       - name: Run Unit Tests
         run: |
           cd ${workspace_path}/${project_name}/firmware
@@ -101,6 +120,7 @@ jobs:
           if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
           Xvfb :99 -screen 0 1366x768x24 &
           make coverage_report
+
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -117,6 +137,7 @@ jobs:
     if: startsWith(github.event.head_commit.message, 'release:') && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+
       - name: Create Release
         run: |
           echo "Creating release..."
