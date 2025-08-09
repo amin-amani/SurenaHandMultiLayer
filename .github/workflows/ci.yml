@@ -43,13 +43,13 @@ jobs:
             make coverage_report || echo "Coverage report target not found."
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/artifact@v3
         with:
-            name: firmware-artifacts
-            path: |
-              ${{ env.firmware_path }}/build/**/*.bin
-              ${{ env.firmware_path }}/build/**/*.hex
-              ${{ env.firmware_path }}/build/**/*.elf
-              ${{ env.firmware_path }}/build/coverage_report
-              ${{ env.firmware_path }}/build/test-results.xml
+          name: firmware-artifacts
+          path: |
+            ${{ env.firmware_path }}/build/**/*.bin
+            ${{ env.firmware_path }}/build/**/*.hex
+            ${{ env.firmware_path }}/build/**/*.elf
+            ${{ env.firmware_path }}/build/coverage_report
+            ${{ env.firmware_path }}/build/test-results.xml
 
