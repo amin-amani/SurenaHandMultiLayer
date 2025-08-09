@@ -42,36 +42,14 @@ jobs:
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report || echo "Coverage report target not found."
 
-  # test-job:
-  #   name: Run Tests
-  #   runs-on: ubuntu-latest
-  #   needs: build-job
-  #   container:
-  #     image: aminamani/ubuntu-raymon:22.04
-  #   steps:
-  #     - uses: actions/checkout@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: firmware-artifacts
+            path: |
+              ${{ env.firmware_path }}/build/**/*.bin
+              ${{ env.firmware_path }}/build/**/*.hex
+              ${{ env.firmware_path }}/build/**/*.elf
+              ${{ env.firmware_path }}/build/coverage_report
+              ${{ env.firmware_path }}/build/test-results.xml
 
-      # - name: Check if test files exist
-      #   run: |
-      #     if [ ! -d "${{ github.workspace }}/firmware/test" ] || [ -z "$(ls -A ${{ github.workspace }}/firmware/test 2>/dev/null)" ]; then
-      #       echo "No firmware test files found. Skipping tests."
-      #       exit 78
-      #     fi
-
-      # - name: Run Unit Tests
-      #   run: |
-      #     cd "${{ github.workspace }}/firmware"
-      #     mkdir build && cd build
-      #     cmake ..
-      #     make
-      #     ls test/ -la || true
-      #     if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
-      #     Xvfb :99 -screen 0 1366x768x24 &
-      #     make coverage_report || echo "Coverage report target not found."
-
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: coverage-report
-      #     path: |
-      #       ${{ github.workspace }}/firmware/build/coverage_report/
-      #       ${{ github.workspace }}/firmware/build/coverage.info
