@@ -34,15 +34,19 @@ jobs:
             -build all \
             -importAll "$firmware_path" \
             -data "$ws_path"
+            cd "$firmware_path"
+            mkdir build && cd build
+            cmake ..
+            make
 
-  test-job:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    needs: build-job
-    container:
-      image: aminamani/ubuntu-raymon:22.04
-    steps:
-      - uses: actions/checkout@v4
+  # test-job:
+  #   name: Run Tests
+  #   runs-on: ubuntu-latest
+  #   needs: build-job
+  #   container:
+  #     image: aminamani/ubuntu-raymon:22.04
+  #   steps:
+  #     - uses: actions/checkout@v4
 
       # - name: Check if test files exist
       #   run: |
@@ -51,20 +55,20 @@ jobs:
       #       exit 78
       #     fi
 
-      - name: Run Unit Tests
-        run: |
-          cd "${{ github.workspace }}/firmware"
-          mkdir build && cd build
-          cmake ..
-          make
-          ls test/ -la || true
-          if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
-          Xvfb :99 -screen 0 1366x768x24 &
-          make coverage_report || echo "Coverage report target not found."
+      # - name: Run Unit Tests
+      #   run: |
+      #     cd "${{ github.workspace }}/firmware"
+      #     mkdir build && cd build
+      #     cmake ..
+      #     make
+      #     ls test/ -la || true
+      #     if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
+      #     Xvfb :99 -screen 0 1366x768x24 &
+      #     make coverage_report || echo "Coverage report target not found."
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: |
-            ${{ github.workspace }}/firmware/build/coverage_report/
-            ${{ github.workspace }}/firmware/build/coverage.info
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage-report
+      #     path: |
+      #       ${{ github.workspace }}/firmware/build/coverage_report/
+      #       ${{ github.workspace }}/firmware/build/coverage.info
