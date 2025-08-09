@@ -41,6 +41,9 @@ jobs:
             if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report || echo "Coverage report target not found."
+            find  / -iname  "Debug"
+            find  / -iname  "Release"
+            find  / -iname  "coverage_report"
       
       
 
