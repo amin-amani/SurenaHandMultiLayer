@@ -47,14 +47,17 @@ jobs:
       
       
 
+      - name: Find build directories (debug)
+        run: |
+          find "$firmware_path" -type d \( -name "Debug" -o -iname "Release" -o -iname "coverage_report" \)
+
       - uses: actions/upload-artifact@v4
-        if: ${{ hashFiles('firmware/**') != '' }}
         with:
           name: firmware-build
           path: |
-            "$firmware_path/Debug/"
-            "$firmware_path/Release/"
-            "$firmware_path/build/coverage_report"
+            ${{ env.firmware_path }}/Debug/
+            ${{ env.firmware_path }}/Release/
+            ${{ env.firmware_path }}/build/coverage_report/
       
       
       
