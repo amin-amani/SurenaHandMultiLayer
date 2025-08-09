@@ -22,10 +22,15 @@ jobs:
 
       - name: Find STM32CubeIDE folder
         run: |
-          echo "Searching for STM32CubeIDE..."
-          find / -type d -iname "stm32cubeide*" 2>/dev/null
+          echo "build with STM32CubeIDE..."
 
-      - name: Find firmware folder
-        run: |
-          echo "Searching for firmware folder..."
-          find / -type d -iname "firmware" 2>/dev/null
+          /opt/st/stm32cubeide_1.17.0/stm32cubeide \
+          --launcher.suppressErrors \
+          -nosplash \
+          -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+          -build all \
+          -importAll /__w/SurenaHandMultiLayer/SurenaHandMultiLayer/firmware \
+          -data /home/ws/
+
+
+          
