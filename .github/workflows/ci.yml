@@ -1,0 +1,125 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+env:
+  workspace_path: "/builds/raymon/electronics"
+  stm32cubeIDE_path: "/opt/st/stm32cubeide_1.17.0/stm32cubeide"
+  project_name: "${{ github.event.repository.name }}"
+
+jobs:
+  pcb-check:
+    name: Check Hardware Structure
+    runs-on: ubuntu-latest
+    container:
+      image: aminamani/ubuntu-raymon:22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start hardware check
+        run: |
+          echo "start checking hardware"
+          uname -a && pwd
+          /update.sh
+          ls / -la
+          /ci_scripts/check_hardware_project.sh
+          python3 /ci_scripts/pcb_struct_plot.py
+          mkdir -p ${workspace_path}/${project_name}/artifacts 
+          cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
+          cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
+
+      - name: Setup SSH Keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.CI_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
+          ssh-keyscan hamgit.ir >> ~/.ssh/known_hosts
+          git config --global user.email "pipeline@pipeline.com"
+          git config --global user.name "pipeline"
+
+      - name: Clone DevOps Dashboard
+        run: |
+          if [ -d "${workspace_path}/devopsdashboard" ]; then rm -r "${workspace_path}/devopsdashboard" && echo "removed old"; else echo "no old folder found"; fi
+          cd ${workspace_path} && git clone --depth=1 git@hamgit.ir:raymon/electronics/devopsdashboard.git
+
+      - name: Update Dashboard
+        run: |
+          mkdir -p ${workspace_path}/devopsdashboard/${project_name}
+          touch ${workspace_path}/devopsdashboard/${project_name}/report.txt
+          touch ${workspace_path}/devopsdashboard/${project_name}/badge.md
+          cp ${workspace_path}/${project_name}/artifacts/* ${workspace_path}/devopsdashboard/${project_name}/
+          echo "${GITHUB_RUN_ID}" >> ${workspace_path}/devopsdashboard/${project_name}/report.txt
+          /ci_scripts/update-project.sh ${project_name} ${workspace_path}/devopsdashboard/README.md
+          cd ${workspace_path}/devopsdashboard
+          git add .
+          git diff --cached --quiet && echo "No changes to commit" || (git commit -m "update ${project_name} statics" && git push)
+
+  build-job:
+    name: Build Firmware
+    runs-on: ubuntu-latest
+    needs: pcb-check
+    container:
+      image: aminamani/ubuntu-raymon:22.04
+    if: ${{ hashFiles('firmware/*') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with STM32CubeIDE
+        run: |
+          mkdir -p /home/ws/
+          echo "Starting STM32CubeIDE headless build..."
+          $stm32cubeIDE_path --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -build all -importAll  ${workspace_path}/${project_name}/firmware/ -data /home/ws/
+          echo "Build completed successfully."
+          cd firmware && ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-build
+          path: |
+            ${workspace_path}/${project_name}/firmware/Debug/
+            ${workspace_path}/${project_name}/firmware/Release/
+
+  test-job:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: build-job
+    container:
+      image: aminamani/ubuntu-raymon:22.04
+    if: ${{ hashFiles('firmware/test/*') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Unit Tests
+        run: |
+          cd ${workspace_path}/${project_name}/firmware
+          mkdir build && cd build
+          cmake ..
+          make
+          ls test/ -la
+          if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
+          Xvfb :99 -screen 0 1366x768x24 &
+          make coverage_report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            ${workspace_path}/${project_name}/firmware/build/coverage_report/
+            ${workspace_path}/${project_name}/firmware/build/coverage.info
+
+  release-job:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: test-job
+    container:
+      image: aminamani/ubuntu-raymon:22.04
+    if: startsWith(github.event.head_commit.message, 'release:') && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        run: |
+          echo "Creating release..."
+          VERSION=$(echo "${GITHUB_EVENT_HEAD_COMMIT_MESSAGE}" | sed -n 's/^release: *//p')
+          git tag -a "v$VERSION" -m "Release version $VERSION"
+          git push origin "v$VERSION"
