@@ -44,12 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check if test files exist
-        run: |
-          if [ ! -d "${{ github.workspace }}/firmware/test" ] || [ -z "$(ls -A ${{ github.workspace }}/firmware/test 2>/dev/null)" ]; then
-            echo "No firmware test files found. Skipping tests."
-            exit 78
-          fi
+      # - name: Check if test files exist
+      #   run: |
+      #     if [ ! -d "${{ github.workspace }}/firmware/test" ] || [ -z "$(ls -A ${{ github.workspace }}/firmware/test 2>/dev/null)" ]; then
+      #       echo "No firmware test files found. Skipping tests."
+      #       exit 78
+      #     fi
 
       - name: Run Unit Tests
         run: |
