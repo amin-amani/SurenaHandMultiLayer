@@ -29,35 +29,36 @@ jobs:
           /ci_scripts/check_hardware_project.sh
           python3 /ci_scripts/pcb_struct_plot.py
           mkdir -p ${workspace_path}/${project_name}/artifacts 
-          cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
-          cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
+          find / -iname "report.txt"
+          # cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
+          # cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
 
-      - name: Setup SSH Keys
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.CI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.CI_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
-          chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
-          ssh-keyscan hamgit.ir >> ~/.ssh/known_hosts
-          git config --global user.email "pipeline@pipeline.com"
-          git config --global user.name "pipeline"
+      # - name: Setup SSH Keys
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.CI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     echo "${{ secrets.CI_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+      #     chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
+      #     ssh-keyscan hamgit.ir >> ~/.ssh/known_hosts
+      #     git config --global user.email "pipeline@pipeline.com"
+      #     git config --global user.name "pipeline"
 
-      - name: Clone DevOps Dashboard
-        run: |
-          if [ -d "${workspace_path}/devopsdashboard" ]; then rm -r "${workspace_path}/devopsdashboard" && echo "removed old"; else echo "no old folder found"; fi
-          cd ${workspace_path} && git clone --depth=1 git@hamgit.ir:raymon/electronics/devopsdashboard.git
+      # - name: Clone DevOps Dashboard
+      #   run: |
+      #     if [ -d "${workspace_path}/devopsdashboard" ]; then rm -r "${workspace_path}/devopsdashboard" && echo "removed old"; else echo "no old folder found"; fi
+      #     cd ${workspace_path} && git clone --depth=1 git@hamgit.ir:raymon/electronics/devopsdashboard.git
 
-      - name: Update Dashboard
-        run: |
-          mkdir -p ${workspace_path}/devopsdashboard/${project_name}
-          touch ${workspace_path}/devopsdashboard/${project_name}/report.txt
-          touch ${workspace_path}/devopsdashboard/${project_name}/badge.md
-          cp ${workspace_path}/${project_name}/artifacts/* ${workspace_path}/devopsdashboard/${project_name}/
-          echo "${GITHUB_RUN_ID}" >> ${workspace_path}/devopsdashboard/${project_name}/report.txt
-          /ci_scripts/update-project.sh ${project_name} ${workspace_path}/devopsdashboard/README.md
-          cd ${workspace_path}/devopsdashboard
-          git add .
-          git diff --cached --quiet && echo "No changes to commit" || (git commit -m "update ${project_name} statics" && git push)
+      # - name: Update Dashboard
+      #   run: |
+      #     mkdir -p ${workspace_path}/devopsdashboard/${project_name}
+      #     touch ${workspace_path}/devopsdashboard/${project_name}/report.txt
+      #     touch ${workspace_path}/devopsdashboard/${project_name}/badge.md
+      #     cp ${workspace_path}/${project_name}/artifacts/* ${workspace_path}/devopsdashboard/${project_name}/
+      #     echo "${GITHUB_RUN_ID}" >> ${workspace_path}/devopsdashboard/${project_name}/report.txt
+      #     /ci_scripts/update-project.sh ${project_name} ${workspace_path}/devopsdashboard/README.md
+      #     cd ${workspace_path}/devopsdashboard
+      #     git add .
+      #     git diff --cached --quiet && echo "No changes to commit" || (git commit -m "update ${project_name} statics" && git push)
 
   build-job:
     name: Build Firmware
