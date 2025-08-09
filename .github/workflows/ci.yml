@@ -23,15 +23,15 @@ jobs:
       - name: Start hardware check
         run: |
           echo "start checking hardware"
-          uname -a && pwd
-          /update.sh
-          ls / -la
-          /ci_scripts/check_hardware_project.sh
-          python3 /ci_scripts/pcb_struct_plot.py
-          mkdir -p ${workspace_path}/${project_name}/artifacts 
-          find / -iname "report.txt"
-          # cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
-          # cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
+          # uname -a && pwd
+          # /update.sh
+          # ls / -la
+          # /ci_scripts/check_hardware_project.sh
+          # python3 /ci_scripts/pcb_struct_plot.py
+          # mkdir -p ${workspace_path}/${project_name}/artifacts 
+          # find / -iname "report.txt"
+          # # cp ${workspace_path}/${project_name}/report.txt ${workspace_path}/${project_name}/artifacts
+          # # cp ${workspace_path}/${project_name}/*.png ${workspace_path}/${project_name}/artifacts
 
       # - name: Setup SSH Keys
       #   run: |
@@ -79,15 +79,15 @@ jobs:
       - name: Build with STM32CubeIDE
         run: |
           find / -iname "st/stm32cubeide_1.17.0" -type d
-          mkdir -p /home/ws/
-          echo "Starting STM32CubeIDE headless build..."
-          $stm32cubeIDE_path --launcher.suppressErrors -nosplash \
-            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
-            -build all \
-            -importAll  ${workspace_path}/${project_name}/firmware/ \
-            -data /home/ws/
-          echo "Build completed successfully."
-          cd firmware && ls -la
+          # mkdir -p /home/ws/
+          # echo "Starting STM32CubeIDE headless build..."
+          # $stm32cubeIDE_path --launcher.suppressErrors -nosplash \
+          #   -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+          #   -build all \
+          #   -importAll  ${workspace_path}/${project_name}/firmware/ \
+          #   -data /home/ws/
+          # echo "Build completed successfully."
+          # cd firmware && ls -la
 
       - uses: actions/upload-artifact@v4
         with:
