@@ -42,15 +42,16 @@ jobs:
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report || echo "Coverage report target not found."
       
+      
 
       - uses: actions/upload-artifact@v4
         if: ${{ hashFiles('firmware/**') != '' }}
         with:
           name: firmware-build
           path: |
-            $firmware_path/Debug/
-            $firmware_path/Release/
-            $firmware_path/build/coverage_report
+            "$firmware_path/Debug/"
+            "$firmware_path/Release/"
+            "$firmware_path/build/coverage_report"
       
       
       
