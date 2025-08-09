@@ -41,15 +41,18 @@ jobs:
             if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report || echo "Coverage report target not found."
+      
 
-      - name: Upload build artifacts
-        uses: actions/artifact@v3
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('firmware/**') != '' }}
         with:
-          name: firmware-artifacts
+          name: firmware-build
           path: |
-            ${{ env.firmware_path }}/build/**/*.bin
-            ${{ env.firmware_path }}/build/**/*.hex
-            ${{ env.firmware_path }}/build/**/*.elf
-            ${{ env.firmware_path }}/build/coverage_report
-            ${{ env.firmware_path }}/build/test-results.xml
+            $firmware_path/Debug/
+            $firmware_path/Release/
+            $firmware_path/build/coverage_report
+      
+      
+      
+
 
