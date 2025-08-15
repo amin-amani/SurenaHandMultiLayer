@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [handMultilayer.PrjPcb]
+   Generated File[HAND_MULTILAYER-Plated.TXT]
+   Generated File[HAND_MULTILAYER.LDP]
+   Generated File[HAND_MULTILAYER.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 01:26:08 ?.? On 16/08/2025
