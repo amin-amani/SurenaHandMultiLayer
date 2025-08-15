@@ -1,5 +1,8 @@
 # SurenaHandMultiLayer
 
+## mcu code path
+
+firmware/Core/Src/main.c
 
 ## can packet format
 
