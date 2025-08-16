@@ -133,6 +133,9 @@ run_handler(data[0],id,data,command_list,(sizeof(command_list)/sizeof(command_li
 void logic_init()
 {
 init_pid_elements();
+target_position[INDEX_FINGER]=1000;
+target_position[LITTLE_FINGER]=2500;
+target_position[THUMB2_FINGER]=2600;
 uint8_t data[]={1,2,3,4,5,6,7,8};
 printf("send\n");
 can_send(0x281,data);
@@ -152,9 +155,11 @@ void logic_loop()
 //    set_finger_position(THUMB_FINGER  , do_pid(target_position[THUMB_FINGER],values[RING_FINGER_FEEDBACK_CHANNEL],&pid_element[INDEX_FINGER]));
 //    set_finger_position(THUMB_FINGER2 , do_pid(target_position[THUMB_FINGER2],values[RING_FINGER_FEEDBACK_CHANNEL],&pid_element[INDEX_FINGER]));
 //    set_finger_position(INDEX_FINGER  , do_pid(target_position[INDEX_FINGER],values[RING_FINGER_FEEDBACK_CHANNEL],&pid_element[INDEX_FINGER]));
-//    set_finger_position(MIDDLE_FINGER , do_pid(target_position[MIDDLE_FINGER],values[RING_FINGER_FEEDBACK_CHANNEL],&pid_element[INDEX_FINGER]));
-//    set_finger_position(RING_FINGER   , do_pid(target_position[RING_FINGER],values[RING_FINGER_FEEDBACK_CHANNEL],&pid_element[INDEX_FINGER]));
-    set_motor_speed(LITTLE_FINGER , do_pid(target_position[LITTLE_FINGER],values[LITTLE_FINGER_FEEDBACK_CHANNEL],&pid_element[LITTLE_FINGER]));
+      set_motor_speed(THUMB2_FINGER , do_pid(target_position[THUMB2_FINGER],values[THUMB2_FINGER_FEEDBACK_CHANNEL]   , &pid_element[THUMB2_FINGER]));
+//    set_motor_speed(INDEX_FINGER , do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
+//    set_motor_speed(MIDDLE_FINGER , do_pid(target_position[MIDDLE_FINGER],values[MIDDLE_FINGER_FEEDBACK_CHANNEL], &pid_element[MIDDLE_FINGER]));
+//    set_motor_speed(RING_FINGER   , do_pid(target_position[RING_FINGER]  , values[RING_FINGER_FEEDBACK_CHANNEL]   , &pid_element[RING_FINGER]));
+//    set_motor_speed(LITTLE_FINGER , do_pid(target_position[LITTLE_FINGER], values[LITTLE_FINGER_FEEDBACK_CHANNEL] , &pid_element[LITTLE_FINGER]));
 
 }
 

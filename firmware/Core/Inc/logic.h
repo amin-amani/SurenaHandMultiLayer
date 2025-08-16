@@ -10,19 +10,28 @@
 
 #include  <inttypes.h>
 
-#define THUMB_FINGER    (0)
-#define INDEX_FINGER    (1)
-#define RING_FINGER     (2)//hardware test pass + open -close
-#define LITTLE_FINGER   (3)//hardware test pass + open -close
-#define MIDDLE_FINGER   (4)
-#define THUMB_FINGER2   (5)
+#define INDEX_MAX 1600
+#define INDEX_MIN 960
 
-#define THUMB_FEEDBACK_CHANNEL          (0)
-#define INDEX_FINGER_FEEDBACK_CHANNEL   (1)
-#define RING_FINGER_FEEDBACK_CHANNEL    (2)
-#define LITTLE_FINGER_FEEDBACK_CHANNEL  (3) //hardware test 2800 22000
-#define MIDDLE_FINGER_FEEDBACK_CHANNEL  (4)
-#define THUMB_FINGER2_FEEDBACK_CHANNEL  (5)
+#define LITTLE_MAX 2800 //open
+#define LITTLE_MIN 2150 //close
+
+#define THUMB2_MAX 3100 //open
+#define THUMB2_MIN 2100 //close
+
+#define INDEX_FINGER    (0) //correct index ok
+#define MIDDLE_FINGER   (1) //ok
+#define RING_FINGER     (2) //hardware test pass + open -close
+#define LITTLE_FINGER   (3)//hardware test pass + open -close
+#define THUMB_FINGER    (4) //ok
+#define THUMB2_FINGER   (5) //ok
+
+#define INDEX_FINGER_FEEDBACK_CHANNEL   (0)  //index
+#define THUMB_FEEDBACK_CHANNEL          (4)
+#define RING_FINGER_FEEDBACK_CHANNEL    (2) //rig
+#define LITTLE_FINGER_FEEDBACK_CHANNEL  (3) //hardware test 2800 2200
+#define MIDDLE_FINGER_FEEDBACK_CHANNEL  (1) //ok
+#define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok
 
 #define JOINT_COUNTS 6
 
