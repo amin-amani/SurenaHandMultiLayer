@@ -27,7 +27,7 @@ jobs:
 
       - name: Build with STM32CubeIDE
         run: |
-          "$stm32cubeIDE_path" \
+           "$stm32cubeIDE_path" \
             --launcher.suppressErrors \
             -nosplash \
             -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
@@ -41,33 +41,39 @@ jobs:
             if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report || echo "Coverage report target not found."
-            find  / -iname  "Debug"
-            find  / -iname  "Release"
-            find  / -iname  "coverage_report"
-      
-      
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: firmware-build
           path: |
-            ${{ env.firmware_path }}/Debug/
-            ${{ env.firmware_path }}/Release/
-            ${{ env.firmware_path }}/build/coverage_report/
-            
-      # - name: Find build directories (debug)
-      #   run: |
-      #     find "$firmware_path" -type d \( -name "Debug" -o -iname "Release" -o -iname "coverage_report" \)
-
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: firmware-build
-      #     path: |
-      #       ${{ env.firmware_path }}/Debug/
-      #       ${{ env.firmware_path }}/Release/
-      #       ${{ env.firmware_path }}/build/coverage_report/
-      
-      
-      
+            ${{ github.workspace }}/firmware/build/
 
 
+  coverity-scan:
+    name: Coverity Scan
+    runs-on: ubuntu-latest
+    container:
+       image: aminamani/ubuntu-raymon:22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Build with Coverity
+        run: |
+          mkdir -p firmware/build
+          mkdir -p firmware/lib/Unity/build
+          cd firmware/lib/Unity/build
+          cmake ..
+          make -j$(nproc) && make install
+          cd -
+          cd firmware/build
+          cmake ..
+          /cov-analysis-linux64-2024.12.1/bin/cov-build --dir cov-int make -j$(nproc)
+          tar czvf project_report.tgz cov-int
+          curl --form token=${{ secrets.COVERITY_TOKEN }}      --form email=didi1364@gmail.com     --form file=@project_report.tgz      --form version="1.0"      --form description="Firmware Coverity Scan"      https://scan.coverity.com/builds?project=amin-amani/SurenaHandMultiLayer   
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverity_build
+          path: |
+            ${{ github.workspace }}/firmware/build/

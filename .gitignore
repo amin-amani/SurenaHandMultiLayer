@@ -1,4 +1,5 @@
 firmware/.vscode/
+firmware/build/
 HardwareDesign/PCB/History/
 pcb/History
 build-*

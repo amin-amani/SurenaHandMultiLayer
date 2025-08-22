@@ -1,16 +1,27 @@
 
 #include "unity_fixture.h"
 #include "unity.h"
+
 #include "string.h"
 #include <unistd.h>
 
 #include "../Core/Inc/logic.h"
 #include "../Core/Inc/delay.h"
+#include "../Core/Inc/bmp280.h"
 
 uint16_t adc_result_mock[6]={0};
 uint8_t can_sent_data[8]={0};
 int can_sent_id=0;
+void SpiWrite_mock(uint8_t index,uint8_t *data,int len)
+{
 
+}
+
+void SPIReadWrite_mock(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen)
+{
+
+
+}
 void delay_fast_mock(uint32_t ms)
 {
     for (int i = 0; i < ms; i++)
@@ -41,9 +52,20 @@ TEST_SETUP(LOGIC_TEST_GROUP)
 
 TEST_TEAR_DOWN(LOGIC_TEST_GROUP)
 {
+
     // Runs after each test
 }
 TEST(LOGIC_TEST_GROUP, test_under_const)
 {
 
+    BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
+        {
+            SPIReadWrite_mock,
+            SpiWrite_mock
+
+        };
+
+  bmp280_register_callbacks(&bmp_sensor);
+   logic_init();
+  logic_loop();
 }

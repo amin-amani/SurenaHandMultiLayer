@@ -11,6 +11,7 @@
 #include "../../Core/Inc/delay.h"
 #include "../../Core/Inc/pid.h"
 #include "../../Core/Inc/command_handler.h"
+#include "../../Core/Inc/bmp280.h"
 #else
 #include "logic.h"
 #include "delay.h"
