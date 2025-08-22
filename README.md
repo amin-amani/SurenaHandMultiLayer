@@ -1,3 +1,8 @@
+<a href="https://scan.coverity.com/projects/amin-amani-surenahandmultilayer">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/32261/badge.svg"/>
+</a>
+
 # SurenaHandMultiLayer
 
 ## mcu code path
