@@ -15,6 +15,7 @@
 #include "logic.h"
 #include "delay.h"
 #include "pid.h"
+#include "bmp280.h"
 #include "command_handler.h"
 #endif
 
@@ -132,19 +133,31 @@ run_handler(data[0],id,data,command_list,(sizeof(command_list)/sizeof(command_li
 
 void logic_init()
 {
-init_pid_elements();
-target_position[INDEX_FINGER]=1000;
-target_position[LITTLE_FINGER]=2500;
-target_position[THUMB2_FINGER]=2600;
-uint8_t data[]={1,2,3,4,5,6,7,8};
-printf("send\n");
-can_send(0x281,data);
+	int i;
+	init_pid_elements();
+	target_position[INDEX_FINGER]=1000;
+	target_position[LITTLE_FINGER]=2500;
+	target_position[THUMB2_FINGER]=2600;
+	uint8_t data[]={1,2,3,4,5,6,7,8};
+	printf("send\n");
+	can_send(0x281,data);
+	for(i=0;i<6;i++)
+	{
+		bmp280_init(i+1);
+		delay_ms(100);
+	}
+
 
 }
 
 void logic_loop()
 {
-	int command=0;
+	int i;
+
+	  for(i=0;i<6;i++){
+		  printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp280_read_pressure(1+i),bmp280_read_temperature(1+i));
+	  	  delay_ms(100);
+		  }
 	if(!pid_enabled){delay_ms(100);return;}
     uint16_t values[JOINT_COUNTS] = {0};
     read_adc(values);

@@ -59,6 +59,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPI_SEL1_Pin GPIO_PIN_10
+#define SPI_SEL1_GPIO_Port GPIOB
+#define SPI_SEL2_Pin GPIO_PIN_11
+#define SPI_SEL2_GPIO_Port GPIOB
 #define DIRVER_DIRECTION_Pin GPIO_PIN_12
 #define DIRVER_DIRECTION_GPIO_Port GPIOB
 #define DRIVER_SELECT0_Pin GPIO_PIN_13
@@ -67,6 +71,8 @@ void Error_Handler(void);
 #define DRIVER_SELECT1_GPIO_Port GPIOB
 #define DRIVER_SELECT2_Pin GPIO_PIN_15
 #define DRIVER_SELECT2_GPIO_Port GPIOB
+#define SPI_SEL0_Pin GPIO_PIN_9
+#define SPI_SEL0_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

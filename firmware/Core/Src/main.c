@@ -24,6 +24,7 @@
 #include "logic.h"
 #include "delay.h"
 #include <stdbool.h>
+#include "bmp280.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,11 +48,14 @@ DMA_HandleTypeDef hdma_adc1;
 
 CAN_HandleTypeDef hcan;
 
+SPI_HandleTypeDef hspi1;
+
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 uint16_t ADCResult[5];
 int count=0;
+int i=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +65,7 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_CAN_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 void hw_read_adc(uint16_t*value);
 int  hw_can_send(uint32_t id,uint8_t *data);
@@ -69,6 +74,20 @@ void hw_set_direction(bool dir);
 void hw_select_driver_motor(uint8_t value);
 //minus means clockwise
 void hw_set_motor_speed(uint8_t motor,int32_t speed );
+
+void SelectSensor(int8_t index);
+void SpiWrite(uint8_t index,uint8_t *data,int len);
+
+void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen);
+
+BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
+{
+	SPIReadWrite,
+	SpiWrite
+
+};
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -128,7 +147,9 @@ int main(void)
   MX_ADC1_Init();
   MX_CAN_Init();
   MX_TIM4_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+	  printf("start app\n");
   if (HAL_CAN_Start(&hcan) != HAL_OK)
      {
        /* Start Error */
@@ -147,6 +168,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   register_delay(HAL_Delay);
+  bmp280_register_callbacks(&bmp_sensor);
+
+
   logic_register_adc(hw_read_adc);
   logic_register_can_send(hw_can_send);
   logic_register_set_motor_speed(hw_set_motor_speed);
@@ -154,6 +178,7 @@ int main(void)
   hw_set_motor_speed(7,0);
   while (1)
   {
+
 	  logic_loop();
 
     /* USER CODE END WHILE */
@@ -350,6 +375,44 @@ static void MX_CAN_Init(void)
 }
 
 /**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief TIM4 Initialization Function
   * @param None
   * @retval None
@@ -440,7 +503,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DIRVER_DIRECTION_Pin|DRIVER_SELECT0_Pin|DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SPI_SEL1_Pin|SPI_SEL2_Pin|DIRVER_DIRECTION_Pin|DRIVER_SELECT0_Pin
+                          |DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin|SPI_SEL0_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : SPI_SEL1_Pin SPI_SEL2_Pin SPI_SEL0_Pin */
+  GPIO_InitStruct.Pin = SPI_SEL1_Pin|SPI_SEL2_Pin|SPI_SEL0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIRVER_DIRECTION_Pin DRIVER_SELECT0_Pin DRIVER_SELECT1_Pin DRIVER_SELECT2_Pin */
   GPIO_InitStruct.Pin = DIRVER_DIRECTION_Pin|DRIVER_SELECT0_Pin|DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin;
@@ -527,7 +598,39 @@ void hw_set_motor_speed(uint8_t motor,int32_t speed )
 
 
 }
+void SelectSensor(int8_t index)
+{
 
+        GPIOB->ODR &= ~ ((0x07)<<9);
+        GPIOB->ODR |= ((0x07 & index)<<9);
+}
+
+
+void SpiWrite(uint8_t index,uint8_t *data,int len)
+{
+	int offset=-1;
+	//if(index==1)offset=1;
+	SelectSensor(index+offset);
+//	GPIOB->ODR&=~(1<<9);
+	HAL_SPI_Transmit(&hspi1, data, len, 1000); //CONFIG
+//	GPIOB->ODR|=1<<9;
+	SelectSensor(index);
+}
+
+void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen)
+{
+	HAL_Delay(5);
+	int offset=-1;
+	//if(index==1)offset=1;
+	SelectSensor(index+offset);
+//	GPIOB->ODR&=~(1<<9);
+	HAL_SPI_Transmit(&hspi1, txBuffer, txLen, 10);
+	HAL_SPI_Receive(&hspi1, rxBuffer, rxLen, 200);
+	SelectSensor(index);
+//	GPIOB->ODR|=1<<9;
+	HAL_Delay(5);
+
+}
 /* USER CODE END 4 */
 
 /**
