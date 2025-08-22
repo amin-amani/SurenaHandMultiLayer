@@ -1,6 +1,7 @@
 firmware/.vscode/
 HardwareDesign/PCB/History/
 pcb/History
+build-*
 pcb/Project*
 pcb/__Previews
 software/.vs/

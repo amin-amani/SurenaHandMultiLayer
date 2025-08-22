@@ -4,8 +4,14 @@
  *  Created on: Aug 22, 2025
  *      Author: cast
  */
+#ifdef  UNIT_TESTING
+#include "../../Core/Inc/bmp280.h"
+#include "../../Core/Inc/delay.h"
+#else
 #include "bmp280.h"
 #include "delay.h"
+#endif
+
 
 
 static uint8_t config[2];
