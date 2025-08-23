@@ -148,7 +148,7 @@ void logic_init()
 		delay_ms(100);
 	}
 
-
+    data[10]=9;
 }
 
 void logic_loop()
