@@ -64,7 +64,7 @@ jobs:
         with:
           name: firmware-coverage-image
           path: |
-            ${{ github.workspace }}/firmware/coverage-screenshot.png
+            ${{ github.workspace }}/firmware/build/coverage-screenshot.png
       
          
       - name: Generate badge
