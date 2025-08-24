@@ -41,6 +41,7 @@ jobs:
             if [ -f ./test/RunAllTests ]; then ./test/RunAllTests; else echo "Test binary not found! Skipping test run."; fi
             Xvfb :99 -screen 0 1366x768x24 &
             make coverage_report | tee coverage_output.log   || echo "Coverage report target not found."
+            find . iname "coverage_output.log" 
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
