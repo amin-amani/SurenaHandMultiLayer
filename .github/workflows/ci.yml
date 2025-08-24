@@ -51,9 +51,12 @@ jobs:
       
       - name: Extract Coverage Percentage
         run: |
-          LINE_COV=$(grep "lines......:" build/coverage_output.log | tail -1 | awk '{print $2}')
-          echo "COVERAGE=${LINE_COV}" >> $GITHUB_ENV
-          echo "Coverage = ${LINE_COV}"      
+          LINE_COV=$(grep "lines......:" ${{ github.workspace }}/firmware/build/coverage_output.log | tail -1 | awk '{print $2}')
+          FUNC_COV=$(grep "functions..:" ${{ github.workspace }}/firmware/build/coverage_output.log | tail -1 | awk '{print $2}')
+          echo "LINE_COV=${LINE_COV}" >> $GITHUB_ENV
+          echo "FUNC_COV=${FUNC_COV}" >> $GITHUB_ENV
+          echo "Line Coverage = ${LINE_COV}"
+          echo "Function Coverage = ${FUNC_COV}"   
           
       - name: Generate badge
         uses: emibcn/badge-action@v2
