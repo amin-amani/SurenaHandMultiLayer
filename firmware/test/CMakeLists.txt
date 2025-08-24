@@ -51,11 +51,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -O0")
 target_compile_options(${PROJECT_NAME} PRIVATE --coverage)
 message("======================!!!!========>>>>>>>>${CMAKE_SOURCE_DIR}")
 add_custom_target(coverage_report
-    COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
-    COMMAND lcov --remove coverage.info '${CMAKE_SOURCE_DIR}/test/*' '${CMAKE_SOURCE_DIR}/lib/Unity/*' --output-file coverage_filtered.info
+    COMMAND lcov --ignore-errors mismatch --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
+    COMMAND lcov --ignore-errors mismatch --ignore-errors unused --remove coverage.info '${CMAKE_SOURCE_DIR}/test/*' '${CMAKE_SOURCE_DIR}/lib/Unity/*' --output-file coverage_filtered.info
     COMMAND genhtml coverage_filtered.info --output-directory coverage_report
-   # WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-   # COMMENT "Generating code coverage report..."
-   # COMMAND DISPLAY=:99 cutycapt --url=file://${CMAKE_BINARY_DIR}/coverage_report/Src/index.html --out=${CMAKE_BINARY_DIR}/coverage-screenshot.png
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 add_dependencies(coverage_report ${PROJECT_NAME})
