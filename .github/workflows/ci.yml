@@ -48,6 +48,7 @@ jobs:
             echo "FUNC_COV=${FUNC_COV}" >> $GITHUB_ENV
             echo "Line Coverage = ${LINE_COV}"
             echo "Function Coverage = ${FUNC_COV}"
+            echo "COVERAGE=${LINE_COV}/${FUNC_COV}" >> $GITHUB_ENV
 
 
 
