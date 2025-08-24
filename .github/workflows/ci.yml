@@ -58,6 +58,12 @@ jobs:
           name: firmware-build
           path: |
             ${{ github.workspace }}/firmware/build/
+
+      - name: Upload image
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-coverage-image
+          path: |
             ${{ github.workspace }}/firmware/coverage-screenshot.png
       
          
