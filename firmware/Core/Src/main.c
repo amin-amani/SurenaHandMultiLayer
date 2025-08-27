@@ -150,6 +150,8 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 	  printf("start app\n");
+     hw_select_driver_motor(7);
+
   if (HAL_CAN_Start(&hcan) != HAL_OK)
      {
        /* Start Error */
