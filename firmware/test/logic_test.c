@@ -40,6 +40,14 @@ memcpy(can_sent_data,data,6);
 return 0;
 }
 
+BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
+    {
+        SPIReadWrite_mock,
+        SpiWrite_mock
+
+    };
+
+
 TEST_GROUP(LOGIC_TEST_GROUP);
 
 TEST_SETUP(LOGIC_TEST_GROUP)
@@ -55,17 +63,21 @@ TEST_TEAR_DOWN(LOGIC_TEST_GROUP)
 
     // Runs after each test
 }
-TEST(LOGIC_TEST_GROUP, test_under_const)
+TEST(LOGIC_TEST_GROUP, when_log_init_call_pid_elements_is_not_null)
 {
 
-    BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
-        {
-            SPIReadWrite_mock,
-            SpiWrite_mock
+    bmp280_register_callbacks(&bmp_sensor);
+    logic_init();
+    pid_element_type *pid_elenemt=get_pid_emelents();
+    uint32_t pos=get_target_positions();
+    for(int i=0; i<JOINT_COUNTS;i++)
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(0,pid_elenemt[i].kp,__LINE__,"");
 
-        };
+}
 
+TEST(LOGIC_TEST_GROUP, test_under_const)
+{
   bmp280_register_callbacks(&bmp_sensor);
-   logic_init();
+
   logic_loop();
 }

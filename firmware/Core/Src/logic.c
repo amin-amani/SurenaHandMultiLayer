@@ -5,8 +5,10 @@
  *      Author: cast
  */
 #include <stdio.h>
-#ifdef UNIT_TESTING
+#include <stdbool.h>
 
+
+#ifdef UNIT_TESTING
 #include "../../Core/Inc/logic.h"
 #include "../../Core/Inc/delay.h"
 #include "../../Core/Inc/pid.h"
@@ -35,19 +37,57 @@ int get_adc_values(uint32_t id , uint8_t*data);
 int motor_move(uint32_t id , uint8_t*data);
 int stop_all_motors(uint32_t id , uint8_t*data);
 
-pid_element_type pid_element[JOINT_COUNTS];
-uint32_t target_position[JOINT_COUNTS];
-uint16_t pid_interval=50;
-uint8_t pid_enabled=0;
+static pid_element_type pid_element[JOINT_COUNTS];
+static uint32_t target_position[JOINT_COUNTS];
+static uint16_t pid_interval=50;
+static uint8_t pid_enabled=0;
 
 const INT_COMMAND_TYPE command_list[] =
 {
-{0, set_finger_goal_position},
-{1, get_finger_goal_position},
-{2, get_adc_values},
-{3, motor_move},
-{4, stop_all_motors}
+    {0, set_finger_goal_position},
+    {1, get_finger_goal_position},
+    {2, get_adc_values},
+    {3, motor_move},
+    {4, stop_all_motors}
 };
+
+pid_element_type* get_pid_emelents()
+{
+ return pid_element;
+}
+
+uint32_t* get_target_positions()
+{
+
+    return target_position;
+}
+void logic_init()
+{
+
+    init_pid_elements();
+    init_finger_positions();
+    init_pressure_sensors();
+    send_can_statup_command();
+
+}
+
+void logic_loop()
+{
+
+    if(pid_enabled)run_pid_for_all_fingers();
+    update_presure_sensors();
+
+}
+
+void update_presure_sensors()
+{
+    int i;
+    for(i=0;i<6;i++)
+    {
+        printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp280_read_pressure(1+i),bmp280_read_temperature(1+i));
+        delay_ms(100);
+    }
+}
 
 int motor_move(uint32_t id , uint8_t*data)
 {
@@ -63,6 +103,7 @@ int motor_move(uint32_t id , uint8_t*data)
 
 	return 0;
 }
+
 int stop_all_motors(uint32_t id , uint8_t*data)
 {
 	pid_enabled=0;
@@ -71,6 +112,7 @@ int stop_all_motors(uint32_t id , uint8_t*data)
 
 	return 0;
 }
+
 int get_adc_values(uint32_t id , uint8_t*data)
 {
 	uint16_t adc_val[JOINT_COUNTS];
@@ -109,10 +151,9 @@ int get_finger_goal_position(uint32_t id,uint8_t*data)
     return 0;
 }
 
-
 void init_pid_elements()
 {
-    for(int i=0;i<6;i++)
+    for(int i=0;i<JOINT_COUNTS;i++)
     {
     pid_element[i].dt=10;
     pid_element[i].kd=0;
@@ -132,33 +173,47 @@ void can_data_received(uint32_t id,uint8_t *data)
 run_handler(data[0],id,data,command_list,(sizeof(command_list)/sizeof(command_list[0])));
 }
 
-void logic_init()
+void init_finger_positions()
 {
-	int i;
-	init_pid_elements();
-	target_position[INDEX_FINGER]=1000;
-	target_position[LITTLE_FINGER]=2500;
-	target_position[THUMB2_FINGER]=2600;
-	uint8_t data[]={1,2,3,4,5,6,7,8};
-	printf("send\n");
-	can_send(0x281,data);
-	for(i=0;i<6;i++)
-	{
-		bmp280_init(i+1);
-		delay_ms(100);
-	}
+	pid_enabled=0;
 
+    target_position[INDEX_FINGER]=1000;
+    target_position[LITTLE_FINGER]=2500;
+    target_position[THUMB2_FINGER]=2600;
 }
 
-void logic_loop()
+void init_pressure_sensors()
 {
-	int i;
 
-	  for(i=0;i<6;i++){
-		  printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp280_read_pressure(1+i),bmp280_read_temperature(1+i));
-	  	  delay_ms(100);
-		  }
-	if(!pid_enabled){delay_ms(100);return;}
+   bool result=0;
+	printf("start init sensor ...\n");
+    for(int i=0;i<6;i++)
+    {
+      	printf("start init sensor %d ...\n",i+1);
+    	for(int j=0;j<30;j++)
+    	{
+    		result=bmp280_init(i+1);
+    		if(result==true)
+    		{
+    			j=30;
+    		}
+
+
+    	}
+    	printf("init sensor %d = %d\n",i+1,result);
+    }
+}
+
+void send_can_statup_command()
+{
+    uint8_t data[]={1,2,3,4,5,6,7,8};
+    printf("send\n");
+    can_send(0x281,data);
+}
+
+void run_pid_for_all_fingers()
+{
+
     uint16_t values[JOINT_COUNTS] = {0};
     read_adc(values);
 
@@ -175,7 +230,10 @@ void logic_loop()
 //    set_motor_speed(LITTLE_FINGER , do_pid(target_position[LITTLE_FINGER], values[LITTLE_FINGER_FEEDBACK_CHANNEL] , &pid_element[LITTLE_FINGER]));
 
 }
+void logic_register_set_servo_position(void set_servo_position_callback(uint8_t  *position))
+{
 
+}
 void logic_register_set_motor_speed(void (*set_motor_speed_callback)(uint8_t motor,int32_t speed ))
 {
 	set_motor_speed=set_motor_speed_callback;
@@ -190,4 +248,4 @@ void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data))
 {
     can_send=can_send_callback;
 }
-
+void logic_register_set_servo_position(hw_set_servo_position);

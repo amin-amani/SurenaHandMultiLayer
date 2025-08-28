@@ -8,7 +8,19 @@
 #ifndef INC_LOGIC_H_
 #define INC_LOGIC_H_
 
+
 #include  <inttypes.h>
+
+#ifdef UNIT_TESTING
+#include "../../Core/Inc/pid.h"
+#include "../../Core/Inc/command_handler.h"
+#else
+#include "pid.h"
+#include "bmp280.h"
+#endif
+
+
+
 
 #define INDEX_MAX 1600
 #define INDEX_MIN 960
@@ -38,8 +50,17 @@
 
 void logic_init();
 void logic_loop();
+void init_pid_elements();
+void init_finger_positions();
+void init_pressure_sensors();
+void update_presure_sensors();
+void send_can_statup_command();
+void run_pid_for_all_fingers();
+uint32_t* get_target_positions();
+pid_element_type* get_pid_emelents();
 void can_data_received(uint32_t id,uint8_t *data);
-void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data));
 void logic_register_adc(void (*read_adc_callback)(uint16_t*value));
+void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data));
 void logic_register_set_motor_speed(void (*set_motor_speed_callback)(uint8_t motor,int32_t speed ));
+void logic_register_set_servo_position(void set_servo_position_callback(uint8_t  *position));
 #endif /* INC_LOGIC_H_ */

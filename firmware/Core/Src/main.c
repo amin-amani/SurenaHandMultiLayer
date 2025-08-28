@@ -70,6 +70,7 @@ static void MX_SPI1_Init(void);
 void hw_read_adc(uint16_t*value);
 int  hw_can_send(uint32_t id,uint8_t *data);
 void hw_set_direction(bool dir);
+void hw_set_servo_position(uint8_t  *position);
 //value is between 0 to 5
 void hw_select_driver_motor(uint8_t value);
 //minus means clockwise
@@ -79,7 +80,7 @@ void SelectSensor(int8_t index);
 void SpiWrite(uint8_t index,uint8_t *data,int len);
 
 void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen);
-
+void hw_set_servo_position(uint8_t  *position);
 BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
 {
 	SPIReadWrite,
@@ -176,6 +177,7 @@ int main(void)
   logic_register_adc(hw_read_adc);
   logic_register_can_send(hw_can_send);
   logic_register_set_motor_speed(hw_set_motor_speed);
+  logic_register_set_servo_position(hw_set_servo_position);
   logic_init();
   hw_set_motor_speed(7,0);
   while (1)
@@ -576,6 +578,13 @@ void hw_select_driver_motor(uint8_t value)
 	GPIOB->ODR &=~(0x07<<13);
 	GPIOB->ODR |=(value<<13);
 }
+void hw_set_servo_position(uint8_t  *position)
+{
+	TIM4->CCR1=(uint32_t)position[0];//50+((position[0]>190)?190:position[0]);
+	TIM4->CCR2=(uint32_t)position[1];//50+((position[1]>190)?190:position[1]);
+	TIM3->CCR2=(uint32_t)position[2];//50+((position[2]>190)?190:position[2]);
+
+}
 //minus means clockwise
 void hw_set_motor_speed(uint8_t motor,int32_t speed )
 {
@@ -625,12 +634,13 @@ void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffe
 	int offset=-1;
 	//if(index==1)offset=1;
 	SelectSensor(index+offset);
+	HAL_Delay(1);
 //	GPIOB->ODR&=~(1<<9);
 	HAL_SPI_Transmit(&hspi1, txBuffer, txLen, 10);
 	HAL_SPI_Receive(&hspi1, rxBuffer, rxLen, 200);
 	SelectSensor(index);
 //	GPIOB->ODR|=1<<9;
-	HAL_Delay(5);
+	HAL_Delay(1);
 
 }
 /* USER CODE END 4 */
