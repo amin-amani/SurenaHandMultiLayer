@@ -187,7 +187,7 @@ void init_pressure_sensors()
 
    bool result=0;
 	printf("start init sensor ...\n");
-    for(int i=0;i<6;i++)
+    for(int i=0;i<5;i++)
     {
       	printf("start init sensor %d ...\n",i+1);
     	for(int j=0;j<30;j++)

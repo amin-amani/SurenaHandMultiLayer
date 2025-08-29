@@ -22,11 +22,17 @@
 
 
 
-#define INDEX_MAX 1600
-#define INDEX_MIN 960
+#define INDEX_MAX 1600 //open
+#define INDEX_MIN 960  //close
 
-#define LITTLE_MAX 2800 //open
-#define LITTLE_MIN 2150 //close
+#define MIDDLE_MAX 2360 //close
+#define MIDDLE_MIN 1200  //open
+
+#define RING_MAX 1800  //open
+#define RING_MIN 420  //close
+
+#define LITTLE_MAX 2530 //open
+#define LITTLE_MIN 1970 //close
 
 #define THUMB2_MAX 3100 //open
 #define THUMB2_MIN 2100 //close
@@ -43,10 +49,12 @@
 #define RING_FINGER_FEEDBACK_CHANNEL    (2) //rig
 #define LITTLE_FINGER_FEEDBACK_CHANNEL  (3) //hardware test 2800 2200
 #define MIDDLE_FINGER_FEEDBACK_CHANNEL  (1) //ok
-#define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok
+#define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok adc8
 
 #define JOINT_COUNTS 6
 
+// sensor p 0 index finger
+// sensor p 2 ring finger
 
 void logic_init();
 void logic_loop();
