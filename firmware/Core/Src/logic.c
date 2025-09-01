@@ -29,6 +29,7 @@ int  (*can_send)(uint32_t id,uint8_t *data);
 void (*read_adc)(uint16_t*value);
 void (*set_finger_position)(uint8_t motor , int32_t speed);
 void (*set_motor_speed)(uint8_t motor,int32_t speed );
+void (*set_servo_position)(uint8_t  *position);
 
 
 int set_finger_goal_position(uint32_t id , uint8_t*data);
@@ -232,20 +233,20 @@ void run_pid_for_all_fingers()
 }
 void logic_register_set_servo_position(void set_servo_position_callback(uint8_t  *position))
 {
-
+	set_servo_position = set_servo_position_callback;
 }
 void logic_register_set_motor_speed(void (*set_motor_speed_callback)(uint8_t motor,int32_t speed ))
 {
-	set_motor_speed=set_motor_speed_callback;
+	set_motor_speed = set_motor_speed_callback;
 }
 
 void logic_register_adc(void (*read_adc_callback)(uint16_t*value))
 {
-    read_adc=read_adc_callback;
+    read_adc = read_adc_callback;
 }
 
 void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data))
 {
-    can_send=can_send_callback;
+    can_send = can_send_callback;
 }
-void logic_register_set_servo_position(hw_set_servo_position);
+
