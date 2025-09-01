@@ -37,9 +37,10 @@ int get_finger_goal_position(uint32_t id , uint8_t*data);
 int get_adc_values(uint32_t id , uint8_t*data);
 int motor_move(uint32_t id , uint8_t*data);
 int stop_all_motors(uint32_t id , uint8_t*data);
+int get_pressure_values(uint32_t id , uint8_t*data);
 
-static pid_element_type pid_element[JOINT_COUNTS];
-static uint32_t target_position[JOINT_COUNTS];
+static pid_element_type pid_element[JOINT_COUNT];
+static uint32_t target_position[JOINT_COUNT];
 static uint16_t pid_interval=50;
 static uint8_t pid_enabled=0;
 
@@ -49,8 +50,10 @@ const INT_COMMAND_TYPE command_list[] =
     {1, get_finger_goal_position},
     {2, get_adc_values},
     {3, motor_move},
-    {4, stop_all_motors}
+    {4, stop_all_motors},
+    {5, get_pressure_values}
 };
+LOGIC_BMP_OUTPUT_TYPE bmp_sensor_value[SENSOR_COUNT];
 
 pid_element_type* get_pid_emelents()
 {
@@ -83,9 +86,11 @@ void logic_loop()
 void update_presure_sensors()
 {
     int i;
-    for(i=0;i<6;i++)
+    for(i=0;i<SENSOR_COUNT;i++)
     {
-        printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp280_read_pressure(1+i),bmp280_read_temperature(1+i));
+    	bmp_sensor_value[i].pressure=bmp280_read_pressure(1+i);
+    	bmp_sensor_value[i].temperature=bmp280_read_temperature(1+i);
+        printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp_sensor_value[i].pressure,bmp_sensor_value[i].temperature);
         delay_ms(100);
     }
 }
@@ -116,14 +121,29 @@ int stop_all_motors(uint32_t id , uint8_t*data)
 
 int get_adc_values(uint32_t id , uint8_t*data)
 {
-	uint16_t adc_val[JOINT_COUNTS];
+	uint16_t adc_val[JOINT_COUNT];
 	uint8_t can_data[8];
 	read_adc(adc_val);
-	if (data[1] >= JOINT_COUNTS) return -1;
+	if (data[1] >= JOINT_COUNT) return -1;
 	can_data[1] = (adc_val[data[1]] & 0xff);
 	can_data[0] = ((adc_val[data[1]] >>  8) & 0xff);
 	can_send(id,can_data);
 	printf("%d %d %d %d %d %d\n",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4],adc_val[5]);
+    return 0;
+}
+
+int get_pressure_values(uint32_t id , uint8_t*data)
+{
+
+	uint8_t can_data[8];
+
+	if (data[1] >= SENSOR_COUNT) return -1;
+	uint32_t pressure = bmp_sensor_value[data[1]].pressure;
+	can_data[0] = (pressure >> 24) & 0xFF; // MSB
+	can_data[1] = (pressure >> 16) & 0xFF;
+	can_data[2] = (pressure >> 8) & 0xFF;
+	can_data[3] = pressure & 0xFF;         // LSB
+	can_send(id,(uint8_t*)can_data);
     return 0;
 }
 
@@ -139,7 +159,7 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	position<<=8;
 	position |= data[2];
 
-	if (data[1] >= JOINT_COUNTS) return -1;
+	if (data[1] >= JOINT_COUNT) return -1;
 	pid_enabled=1;
 	target_position[data[1]]=position;
 	printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
@@ -154,7 +174,7 @@ int get_finger_goal_position(uint32_t id,uint8_t*data)
 
 void init_pid_elements()
 {
-    for(int i=0;i<JOINT_COUNTS;i++)
+    for(int i=0;i<JOINT_COUNT;i++)
     {
     pid_element[i].dt=10;
     pid_element[i].kd=0;
@@ -215,7 +235,7 @@ void send_can_statup_command()
 void run_pid_for_all_fingers()
 {
 
-    uint16_t values[JOINT_COUNTS] = {0};
+    uint16_t values[JOINT_COUNT] = {0};
     read_adc(values);
 
     delay_ms(pid_interval);

@@ -51,10 +51,18 @@
 #define MIDDLE_FINGER_FEEDBACK_CHANNEL  (1) //ok
 #define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok adc8
 
-#define JOINT_COUNTS 6
+#define JOINT_COUNT 6
+#define SENSOR_COUNT 6
 
 // sensor p 0 index finger
 // sensor p 2 ring finger
+typedef struct
+{
+	float pressure;
+	float temperature;
+
+} LOGIC_BMP_OUTPUT_TYPE;
+
 
 void logic_init();
 void logic_loop();
