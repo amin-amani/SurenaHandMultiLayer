@@ -38,6 +38,7 @@ int get_adc_values(uint32_t id , uint8_t*data);
 int motor_move(uint32_t id , uint8_t*data);
 int stop_all_motors(uint32_t id , uint8_t*data);
 int get_pressure_values(uint32_t id , uint8_t*data);
+int set_servo_goal_position(uint32_t id,uint8_t*data);
 
 static pid_element_type pid_element[JOINT_COUNT];
 static uint32_t target_position[JOINT_COUNT];
@@ -51,7 +52,8 @@ const INT_COMMAND_TYPE command_list[] =
     {2, get_adc_values},
     {3, motor_move},
     {4, stop_all_motors},
-    {5, get_pressure_values}
+    {5, get_pressure_values},
+    {6, set_servo_goal_position}
 };
 LOGIC_BMP_OUTPUT_TYPE bmp_sensor_value[SENSOR_COUNT];
 
@@ -165,6 +167,21 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
 	return 0;
 }
+
+int set_servo_goal_position(uint32_t id,uint8_t*data)
+{
+
+
+	uint8_t position[3];
+	position[0]=data[1];
+	position[1]=data[2];
+	position[2]=data[3];
+
+	set_servo_position(position);
+	printf("set servo pos %d %d %d\n",position[0],position[1],position[2]);
+	return 0;
+}
+
 
 int get_finger_goal_position(uint32_t id,uint8_t*data)
 {

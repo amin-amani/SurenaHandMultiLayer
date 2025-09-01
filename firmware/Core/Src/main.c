@@ -650,11 +650,12 @@ void hw_select_driver_motor(uint8_t value)
 	GPIOB->ODR &=~(0x07<<13);
 	GPIOB->ODR |=(value<<13);
 }
+
 void hw_set_servo_position(uint8_t  *position)
 {
-	TIM4->CCR1=(uint32_t)position[0];//50+((position[0]>190)?190:position[0]);
-	TIM4->CCR2=(uint32_t)position[1];//50+((position[1]>190)?190:position[1]);
-	TIM3->CCR2=(uint32_t)position[2];//50+((position[2]>190)?190:position[2]);
+	TIM4->CCR1 = 50+((position[0]>190)?190:position[0]);
+	TIM4->CCR2 = 50+((position[1]>190)?190:position[1]);
+	TIM3->CCR2 = 50+((position[2]>190)?190:position[2]);
 
 }
 //minus means clockwise
