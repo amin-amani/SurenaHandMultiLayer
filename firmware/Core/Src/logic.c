@@ -40,6 +40,7 @@ int stop_all_motors(uint32_t id , uint8_t*data);
 int get_pressure_values(uint32_t id , uint8_t*data);
 int set_servo_goal_position(uint32_t id,uint8_t*data);
 
+
 static pid_element_type pid_element[JOINT_COUNT];
 static uint32_t target_position[JOINT_COUNT];
 static uint16_t pid_interval=50;
@@ -71,6 +72,7 @@ void logic_init()
 {
 
     init_pid_elements();
+    init_servo_positions();
     init_finger_positions();
     init_pressure_sensors();
     send_can_statup_command();
@@ -219,7 +221,11 @@ void init_finger_positions()
     target_position[LITTLE_FINGER]=2500;
     target_position[THUMB2_FINGER]=2600;
 }
-
+void init_servo_positions(void)
+{
+	uint8_t servo_init_angles[]={90,90,90};
+	set_servo_position(servo_init_angles);
+}
 void init_pressure_sensors()
 {
 

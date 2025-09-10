@@ -34,8 +34,8 @@
 #define LITTLE_MAX 2530 //open
 #define LITTLE_MIN 1970 //close
 
-#define THUMB2_MAX 3100 //open
-#define THUMB2_MIN 2100 //close
+#define THUMB2_MAX 3230 //open
+#define THUMB2_MIN 2297 //close
 
 #define INDEX_FINGER    (0) //correct index ok
 #define MIDDLE_FINGER   (1) //ok
@@ -68,6 +68,7 @@ void logic_init();
 void logic_loop();
 void init_pid_elements();
 void init_finger_positions();
+void init_servo_positions(void);
 void init_pressure_sensors();
 void update_presure_sensors();
 void send_can_statup_command();
