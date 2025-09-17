@@ -224,7 +224,7 @@ void init_finger_positions()
 void init_servo_positions(void)
 {
 	uint8_t servo_init_angles[]={90,90,90};
-	set_servo_position(servo_init_angles);
+//	set_servo_position(servo_init_angles);
 }
 void init_pressure_sensors()
 {
