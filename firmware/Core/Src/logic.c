@@ -18,7 +18,6 @@
 #include "logic.h"
 #include "delay.h"
 #include "pid.h"
-#include "bmp280.h"
 #include "command_handler.h"
 #endif
 
@@ -30,7 +29,9 @@ void (*read_adc)(uint16_t*value);
 void (*set_finger_position)(uint8_t motor , int32_t speed);
 void (*set_motor_speed)(uint8_t motor,int32_t speed );
 void (*set_servo_position)(uint8_t  *position);
-
+float (*sensor_read_pressure)(int index);
+float (*sensor_read_temperature)(int index);
+bool (*sensor_init)(int index);
 
 int set_finger_goal_position(uint32_t id , uint8_t*data);
 int get_finger_goal_position(uint32_t id , uint8_t*data);
@@ -92,8 +93,8 @@ void update_presure_sensors()
     int i;
     for(i=0;i<SENSOR_COUNT;i++)
     {
-    	bmp_sensor_value[i].pressure=bmp280_read_pressure(1+i);
-    	bmp_sensor_value[i].temperature=bmp280_read_temperature(1+i);
+    	bmp_sensor_value[i].pressure = sensor_read_pressure(i+1);
+    	bmp_sensor_value[i].temperature = sensor_read_temperature(i+1);
         printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp_sensor_value[i].pressure,bmp_sensor_value[i].temperature);
         delay_ms(100);
     }
@@ -236,7 +237,7 @@ void init_pressure_sensors()
       	printf("start init sensor %d ...\n",i+1);
     	for(int j=0;j<30;j++)
     	{
-    		result=bmp280_init(i+1);
+            result=sensor_init(i+1);
     		if(result==true)
     		{
     			j=30;
@@ -293,3 +294,16 @@ void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data))
     can_send = can_send_callback;
 }
 
+void logic_register_read_pressure(float (*sensor_read_pressure_callback)(int index))
+{
+	sensor_read_pressure = sensor_read_pressure_callback;
+}
+
+void logic_register_read_temperature(float (*sensor_read_temperature_callback)(int index))
+{
+sensor_read_temperature=sensor_read_temperature_callback;
+}
+void  logic_register_sensor_init(bool (*sensor_init_callback)(int index))
+{
+    sensor_init = sensor_init_callback;
+}

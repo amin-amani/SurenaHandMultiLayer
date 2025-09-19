@@ -10,6 +10,7 @@
 
 
 #include  <inttypes.h>
+#include <stdbool.h>
 
 #ifdef UNIT_TESTING
 #include "../../Core/Inc/pid.h"
@@ -80,4 +81,7 @@ void logic_register_adc(void (*read_adc_callback)(uint16_t*value));
 void logic_register_can_send(int can_send_callback(uint32_t id,uint8_t *data));
 void logic_register_set_motor_speed(void (*set_motor_speed_callback)(uint8_t motor,int32_t speed ));
 void logic_register_set_servo_position(void set_servo_position_callback(uint8_t  *position));
+void logic_register_read_pressure(float (*sensor_read_pressure_callback)(int index));
+void logic_register_read_temperature(float (*sensor_read_temperature_callback)(int index));
+void logic_register_sensor_init(bool (*sensor_init_callback)(int index));
 #endif /* INC_LOGIC_H_ */

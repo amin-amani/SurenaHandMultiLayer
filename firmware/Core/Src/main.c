@@ -182,6 +182,9 @@ int main(void)
   logic_register_can_send(hw_can_send);
   logic_register_set_motor_speed(hw_set_motor_speed);
   logic_register_set_servo_position(hw_set_servo_position);
+  logic_register_read_pressure(bmp280_read_pressure);
+  logic_register_read_temperature(bmp280_read_temperature);
+  logic_register_sensor_init(bmp280_init);
   logic_init();
   hw_set_motor_speed(7,0);
   while (1)
