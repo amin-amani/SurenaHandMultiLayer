@@ -34,9 +34,12 @@ float (*sensor_read_temperature)(int index);
 bool (*sensor_init)(int index);
 
 int set_finger_goal_position(uint32_t id , uint8_t*data);
+int set_finger_goal_speed(uint32_t id , uint8_t*data);
+int set_finger_goal_pressure(uint32_t id , uint8_t*data);
+int set_finger_pid_values(uint32_t id , uint8_t*data);
 int get_finger_goal_position(uint32_t id , uint8_t*data);
 int get_adc_values(uint32_t id , uint8_t*data);
-int motor_move(uint32_t id , uint8_t*data);
+int move_motor(uint32_t id , uint8_t*data);
 int stop_all_motors(uint32_t id , uint8_t*data);
 int get_pressure_values(uint32_t id , uint8_t*data);
 int set_servo_goal_position(uint32_t id,uint8_t*data);
@@ -44,18 +47,23 @@ int set_servo_goal_position(uint32_t id,uint8_t*data);
 
 static pid_element_type pid_element[JOINT_COUNT];
 static uint32_t target_position[JOINT_COUNT];
+static uint32_t target_speed[JOINT_COUNT];
+static uint32_t target_pressure[SENSOR_COUNT];
 static uint16_t pid_interval=50;
 static uint8_t pid_enabled=0;
 
 const INT_COMMAND_TYPE command_list[] =
 {
     {0, set_finger_goal_position},
-    {1, get_finger_goal_position},
-    {2, get_adc_values},
-    {3, motor_move},
-    {4, stop_all_motors},
-    {5, get_pressure_values},
-    {6, set_servo_goal_position}
+    {1, set_finger_goal_speed},
+    {2, set_finger_goal_pressure},
+    {3, set_finger_pid_values},
+    {4, get_finger_goal_position},
+	{5, get_pressure_values},
+    {6, get_adc_values},
+    {7, move_motor},
+    {8, stop_all_motors},
+    {9, set_servo_goal_position},
 };
 LOGIC_BMP_OUTPUT_TYPE bmp_sensor_value[SENSOR_COUNT];
 
@@ -117,10 +125,13 @@ int motor_move(uint32_t id , uint8_t*data)
 
 int stop_all_motors(uint32_t id , uint8_t*data)
 {
-	pid_enabled=0;
-	set_motor_speed(7,0);
-	printf("stop\n");
-
+	pid_enabled = 0;
+	
+	// Stop all motors
+	for (int i = 0; i < JOINT_COUNT; i++) {
+		set_motor_speed(i, 0);
+	}
+	printf("stop all motors.\n");
 	return 0;
 }
 
@@ -138,50 +149,111 @@ int get_adc_values(uint32_t id , uint8_t*data)
 }
 
 int get_pressure_values(uint32_t id , uint8_t*data)
-{
-
+{	
 	uint8_t can_data[8];
+	
+	// Send pressure values for all sensors that are requested (non-zero in data[1-6])
+	for (int i = 0; i < SENSOR_COUNT; i++) {
+		if (data[i+1] != 0) {
+			uint32_t pressure = (uint32_t)bmp_sensor_value[i].pressure;
+			can_data[0] = (pressure >> 24) & 0xFF; // MSB
+			can_data[1] = (pressure >> 16) & 0xFF;
+			can_data[2] = (pressure >> 8) & 0xFF;
+			can_data[3] = pressure & 0xFF;         // LSB
+			// can_data[4] = 0; can_data[5] = 0; can_data[6] = 0; can_data[7] = 0;
+			can_send(id, can_data);
+		}
+	}
 
-	if (data[1] >= SENSOR_COUNT) return -1;
-	uint32_t pressure = bmp_sensor_value[data[1]].pressure;
-	can_data[0] = (pressure >> 24) & 0xFF; // MSB
-	can_data[1] = (pressure >> 16) & 0xFF;
-	can_data[2] = (pressure >> 8) & 0xFF;
-	can_data[3] = pressure & 0xFF;         // LSB
-	can_send(id,(uint8_t*)can_data);
     return 0;
 }
 
 int set_finger_goal_position(uint32_t id,uint8_t*data)
 {
+	// Data Format: [command_id, motor0, motor1, motor2, motor3, motor4, motor5, trigger]
+	// Each motor value represents position for that finger
+	uint8_t trigger = data[7];
+	
+	for (int i = 0; i < JOINT_COUNT; i++) {
+		if (data[i+1] != 0) {
+			target_position[i] = data[i+1]; // should be mapped for better precision
+			printf("set pos[%d] = %d\n", i, target_position[i]);
+		}
+	}
+	
+	if (trigger == 1) pid_enabled = 1;
+	else pid_enabled = 0;
+	
+	return 0;
+}
 
-	int32_t position=0;
-	position  = data[5];
-	position<<=8;
-	position |= data[4];
-	position<<=8;
-	position |= data[3];
-	position<<=8;
-	position |= data[2];
+int set_finger_goal_speed(uint32_t id,uint8_t*data)
+{
+	// Each motor value represents speed for that finger
+	for (int i = 0; i < JOINT_COUNT; i++) {
+		if (data[i+1] != 0) {
+			target_speed[i] = data[i+1] * 10; // should be mapped for better precision
+			printf("set speed[%d] = %d\n", i, target_speed[i]);
+		}
+	}
+	
+	return 0;
+}
 
-	if (data[1] >= JOINT_COUNT) return -1;
-	pid_enabled=1;
-	target_position[data[1]]=position;
-	printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
+int set_finger_goal_pressure(uint32_t id,uint8_t*data)
+{
+	// Each sensor value represents target pressure for that sensor
+	for (int i = 0; i < SENSOR_COUNT; i++) {
+		if (data[i+1] != 0) {
+			target_pressure[i] = data[i+1] * 10; // Scale up for better precision
+			printf("set pressure[%d] = %d\n", i, target_pressure[i]);
+		}
+	}
+	
+	return 0;
+}
+
+int set_finger_pid_values(uint32_t id,uint8_t*data)
+{
+	// For simplicity, we'll set Kp, Kd, and Ki equal for all motors
+	// Data Format: [command_id, Kp, Ki, Kd]
+	for (int i = 0; i < JOINT_COUNT; i++) {
+		pid_element[i].kp = data[1] / 10.0f; // should be mapped for better precision
+		pid_element[i].ki = data[2] / 10.0f; // should be mapped for better precision
+		pid_element[i].kd = data[3] / 10.0f; // should be mapped for better precision
+		printf("set PID Kp = %f, Ki = %f, Kd = %f\n", pid_element[i].kp, pid_element[i].ki, pid_element[i].kd);
+	}
+	
+	return 0;
+}
+
+int move_motor(uint32_t id,uint8_t*data)
+{
+	// Set both angle (position) and speed for the target motor
+	// Data Format: [command_id, motor, pos, speed]
+	target_position[data[1]] = data[2];                 // should be mapped for better precision
+	for (int i = 0; i < JOINT_COUNT; i++) {
+		target_speed[i] = (i==data[1]) ? data[3] : 0;   // should be mapped for better precision
+	}
+	printf("move motor[%d] pos=%d speed=%d\n", data[1], target_position[data[1]], target_speed[data[1]]);
+	
+	pid_enabled = 1;
 	return 0;
 }
 
 int set_servo_goal_position(uint32_t id,uint8_t*data)
 {
+	// Data Format: [command_id, servo0, servo1, servo2, servo3, servo4, servo5, trigger]
+	uint8_t trigger = data[7];
+	
+	uint8_t position[6];
+	for (int i = 0; i < 6; i++) {
+		position[i] = data[i+1];
+	}
 
-
-	uint8_t position[3];
-	position[0]=data[1];
-	position[1]=data[2];
-	position[2]=data[3];
-
-	set_servo_position(position);
-	printf("set servo pos %d %d %d\n",position[0],position[1],position[2]);
+	if (trigger == 1) set_servo_position(position);
+	printf("set servo pos %d %d %d %d %d %d (trigger=%d)\n", 
+		   position[0], position[1], position[2], position[3], position[4], position[5], trigger);
 	return 0;
 }
 
@@ -221,6 +293,10 @@ void init_finger_positions()
     target_position[INDEX_FINGER]=1000;
     target_position[LITTLE_FINGER]=2500;
     target_position[THUMB2_FINGER]=2600;
+    
+    for (int i = 0; i < JOINT_COUNT; i++) { target_speed[i] = 0; }
+    
+    for (int i = 0; i < SENSOR_COUNT; i++) { target_pressure[i] = 0; }
 }
 void init_servo_positions(void)
 {

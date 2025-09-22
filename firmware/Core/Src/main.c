@@ -659,6 +659,7 @@ void hw_set_servo_position(uint8_t  *position)
 	TIM4->CCR1 = 50+((position[0]>190)?190:position[0]);
 	TIM4->CCR2 = 50+((position[1]>190)?190:position[1]);
 	TIM3->CCR2 = 50+((position[2]>190)?190:position[2]);
+  // TODO: motors 3-5 must be added.
 
 }
 //minus means clockwise

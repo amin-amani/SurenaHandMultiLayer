@@ -53,7 +53,7 @@
 #define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok adc8
 
 #define JOINT_COUNT 6
-#define SENSOR_COUNT 6
+#define SENSOR_COUNT 5
 
 // sensor p 0 index finger
 // sensor p 2 ring finger
