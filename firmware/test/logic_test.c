@@ -93,7 +93,7 @@ TEST(LOGIC_TEST_GROUP, when_can_packet_recive_logic_set_motor_speed)
 {
     uint32_t id=0x281;
     // uint8_t data[8]={0,1,0x76,0x06,0,0,0,7};
-    uint8_t data[8]={6,114,76,6,255,173,97,7};
+    uint8_t data[8]={0,3,76,114,255,173,97,0};
     can_data_received( id,data);
-
+    logic_loop();
 }
