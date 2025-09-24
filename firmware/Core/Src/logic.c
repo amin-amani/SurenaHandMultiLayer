@@ -35,7 +35,7 @@ bool (*sensor_init)(int index);
 
 int set_finger_goal_position(uint32_t id , uint8_t*data);
 int set_finger_goal_speed(uint32_t id , uint8_t*data);
-int set_finger_goal_pressure(uint32_t id , uint8_t*data);
+int set_pressure_limits(uint32_t id , uint8_t*data);
 int set_finger_pid_values(uint32_t id , uint8_t*data);
 int get_finger_goal_position(uint32_t id , uint8_t*data);
 int get_adc_values(uint32_t id , uint8_t*data);
@@ -88,7 +88,7 @@ void logic_init()
     init_servo_positions();
     init_finger_positions();
     init_pressure_sensors();
-    // send_can_statup_command();
+    send_can_statup_command();
 
 }
 
@@ -336,7 +336,7 @@ void init_pressure_sensors()
 
 void send_can_statup_command()
 {
-    uint8_t data[]={1,2,3,4,5,6,7,8};
+    uint8_t data[]={8,2,3,4,5,6,7,8};
     printf("send\n");
     can_send(0x281,data);
 }
