@@ -254,14 +254,19 @@ int set_servo_goal_position(uint32_t id,uint8_t*data)
 	// Data Format: [command_id, servo0, servo1, servo2, servo3, servo4, servo5, trigger]
 	uint8_t trigger = data[7];
 	
-	uint8_t position[6];
-	for (int i = 0; i < 6; i++) {
-		position[i] = data[i+1];
-	}
+	uint8_t position[3];
+    // right hand
+	position[0] = data[1];
+	position[1] = data[2];
+	position[2] = data[3];
+    // left hand
+	// position[0] = data[4];
+	// position[1] = data[5];
+	// position[2] = data[6];
 
 	if (trigger == 1) set_servo_position(position);
-	printf("set servo pos %d %d %d %d %d %d (trigger=%d)\n", 
-		   position[0], position[1], position[2], position[3], position[4], position[5], trigger);
+	printf("set servo pos %d %d %d (trigger=%d)\n", 
+		   position[0], position[1], position[2], trigger);
 	return 0;
 }
 
