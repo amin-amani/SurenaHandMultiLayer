@@ -106,6 +106,14 @@ void logic_loop()
     }
 }
 
+uint8_t get_pid_status(){
+    return pid_enabled;
+}
+
+uint8_t get_trigger_status(){
+    return control_trigger;
+}
+
 void update_presure_sensors()
 {
     int i;
@@ -212,7 +220,7 @@ int set_pressure_limits(uint32_t id,uint8_t*data)
 {
 	// Each sensor value represents target pressure for that sensor
 	for (int i = 0; i < SENSOR_COUNT; i++) {
-		pressure_limits[i] = data[i+1] * 10; // Scale up for better precision
+        pressure_limits[i] = data[i+1] * 1; // Scale up for better precision
 		printf("set pressure[%d] = %d\n", i, pressure_limits[i]);
 	}
 	
@@ -366,7 +374,7 @@ void run_pid_for_all_fingers()
 
 }
 
-static void control_logic_loop(void)
+static void control_logic_loop()
 {
     // Check termination conditions for each motor
     for (int i = 0; i < JOINT_COUNT; i++) {
@@ -430,11 +438,10 @@ static uint8_t is_motor_at_target_position(uint8_t motor_index)
             return 0;
     }
     
-    // Check if within tolerance (e.g., ±50 ADC units)
-    int32_t error = (int32_t)target_position[motor_index] - (int32_t)current_position;
+    int16_t error = (int16_t)target_position[motor_index] - (int16_t)current_position;
     if (error < 0) error = -error; // Absolute value
     
-    return (error <= 5); // Tolerance of 50 ADC units
+    return (error <= 5); // Tolerance: 5
 }
 
 static uint8_t is_pressure_limit_reached(uint8_t sensor_index)
@@ -442,7 +449,7 @@ static uint8_t is_pressure_limit_reached(uint8_t sensor_index)
     if (sensor_index >= SENSOR_COUNT) return 0;
     
     // Check if current pressure exceeds the limit
-    float current_pressure = bmp_sensor_value[sensor_index].pressure;
+    float current_pressure = (sensor_index<5) ? bmp_sensor_value[sensor_index].pressure : bmp_sensor_value[sensor_index-1].pressure;
     return (current_pressure >= pressure_limits[sensor_index]);
 }
 

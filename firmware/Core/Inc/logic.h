@@ -53,7 +53,7 @@
 #define THUMB2_FINGER_FEEDBACK_CHANNEL  (5) //ok adc8
 
 #define JOINT_COUNT 6
-#define SENSOR_COUNT 5
+#define SENSOR_COUNT 6
 
 // sensor p 0 index finger
 // sensor p 2 ring finger
@@ -84,4 +84,6 @@ void logic_register_set_servo_position(void set_servo_position_callback(uint8_t 
 void logic_register_read_pressure(float (*sensor_read_pressure_callback)(int index));
 void logic_register_read_temperature(float (*sensor_read_temperature_callback)(int index));
 void logic_register_sensor_init(bool (*sensor_init_callback)(int index));
+uint8_t get_pid_status();
+uint8_t get_trigger_status();
 #endif /* INC_LOGIC_H_ */
