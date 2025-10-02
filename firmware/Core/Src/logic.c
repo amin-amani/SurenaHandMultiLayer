@@ -5,7 +5,7 @@
  *      Author: cast
  */
 #include <stdio.h>
-#include <stdbool.h>
+#include <inttypes.h>
 
 
 #ifdef UNIT_TESTING
@@ -34,40 +34,38 @@ float (*sensor_read_temperature)(int index);
 bool (*sensor_init)(int index);
 
 int set_finger_goal_position(uint32_t id , uint8_t*data);
-int set_finger_goal_speed(uint32_t id , uint8_t*data);
 int set_pressure_limits(uint32_t id , uint8_t*data);
 int set_finger_pid_values(uint32_t id , uint8_t*data);
 int get_finger_goal_position(uint32_t id , uint8_t*data);
 int get_adc_values(uint32_t id , uint8_t*data);
-int move_motor(uint32_t id , uint8_t*data);
+int motor_move(uint32_t id , uint8_t*data);
 int stop_all_motors(uint32_t id , uint8_t*data);
 int get_pressure_values(uint32_t id , uint8_t*data);
 int set_servo_goal_position(uint32_t id,uint8_t*data);
-
-static void control_logic_loop(void);
-static uint8_t is_motor_at_target_position(uint8_t motor_index);
-static uint8_t is_pressure_limit_reached(uint8_t sensor_index);
+int set_finger_goal_position_amani(uint32_t id,uint8_t*data);
 
 static pid_element_type pid_element[JOINT_COUNT];
 static uint32_t target_position[JOINT_COUNT];
-static uint32_t target_speed[JOINT_COUNT];
 static uint32_t pressure_limits[SENSOR_COUNT];
 static uint16_t pid_interval=50;
 static uint8_t pid_enabled=0;
 static uint8_t control_trigger=0;
+const int error_tolerance = 50;
 
 const INT_COMMAND_TYPE command_list[] =
 {
-    {0, set_finger_goal_position},
-    {1, set_finger_goal_speed},
-    {2, set_pressure_limits},
-    {3, set_finger_pid_values},
-    {4, get_finger_goal_position},
-	{5, get_pressure_values},
-    {6, get_adc_values},
-    {7, move_motor},
-    {8, stop_all_motors},
-    {9, set_servo_goal_position},
+    {0, set_finger_goal_position_amani},
+    {1, get_finger_goal_position},
+    {2, get_adc_values},
+    {3, motor_move},
+    {4, stop_all_motors},
+    {5, get_pressure_values},
+    {6, set_servo_goal_position},
+
+    {10, set_finger_goal_position},
+    {11, set_pressure_limits},
+    {12, set_finger_pid_values},
+
 };
 LOGIC_BMP_OUTPUT_TYPE bmp_sensor_value[SENSOR_COUNT];
 
@@ -83,6 +81,7 @@ uint32_t* get_target_positions()
 }
 void logic_init()
 {
+    control_trigger = 0;
 
     init_pid_elements();
     init_servo_positions();
@@ -184,6 +183,25 @@ int get_pressure_values(uint32_t id , uint8_t*data)
     return 0;
 }
 
+int set_finger_goal_position_amani(uint32_t id,uint8_t*data)
+{
+
+    int32_t position=0;
+    position  = data[5];
+    position<<=8;
+    position |= data[4];
+    position<<=8;
+    position |= data[3];
+    position<<=8;
+    position |= data[2];
+
+    if (data[1] >= JOINT_COUNT) return -1;
+    pid_enabled=1;
+    target_position[data[1]]=position;
+    printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
+    return 0;
+}
+
 int set_finger_goal_position(uint32_t id,uint8_t*data)
 {
 	// Data Format: [command_id, motor0, motor1, motor2, motor3, motor4, motor5, trigger]
@@ -191,27 +209,12 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	uint8_t trigger = data[7];
 	
 	for (int i = 0; i < JOINT_COUNT; i++) {
-		target_position[i] = data[i+1]; // should be mapped for better precision
+        target_position[i] = data[i+1] * 4095;
+        target_position[i] /= 255;
 		printf("set pos[%d] = %d\n", i, target_position[i]);
 	}
 	
 	control_trigger = trigger;
-	if (trigger == 1) {
-		pid_enabled = 1;
-	} else {
-		pid_enabled = 0;
-	}
-	
-	return 0;
-}
-
-int set_finger_goal_speed(uint32_t id,uint8_t*data)
-{
-	// Each motor value represents speed for that finger
-	for (int i = 0; i < JOINT_COUNT; i++) {
-		target_speed[i] = data[i+1] * 10; // should be mapped for better precision
-		printf("set speed[%d] = %d\n", i, target_speed[i]);
-	}
 	
 	return 0;
 }
@@ -232,45 +235,23 @@ int set_finger_pid_values(uint32_t id,uint8_t*data)
 	// For simplicity, we'll set Kp, Kd, and Ki equal for all motors
 	// Data Format: [command_id, Kp, Ki, Kd]
 	for (int i = 0; i < JOINT_COUNT; i++) {
-		pid_element[i].kp = data[1] / 10.0f; // should be mapped for better precision
-		pid_element[i].ki = data[2] / 10.0f; // should be mapped for better precision
-		pid_element[i].kd = data[3] / 10.0f; // should be mapped for better precision
+        pid_element[i].kp = data[1] / 100.0f;
+        pid_element[i].ki = data[2] / 100.0f;
+        pid_element[i].kd = data[3] / 100.0f;
 		printf("set PID Kp = %f, Ki = %f, Kd = %f\n", pid_element[i].kp, pid_element[i].ki, pid_element[i].kd);
 	}
 	
 	return 0;
 }
 
-int move_motor(uint32_t id,uint8_t*data)
-{
-	// Set both angle (position) and speed for the target motor
-	// Data Format: [command_id, motor, pos, speed]
-	
-	target_position[data[1]] = data[2];                 // should be mapped for better precision
-	for (int i = 0; i < JOINT_COUNT; i++) {
-		target_speed[i] = (i==data[1]) ? data[3] : 0;   // should be mapped for better precision
-	}
-	printf("move motor[%d] pos=%d speed=%d\n", data[1], target_position[data[1]], target_speed[data[1]]);
-	
-	pid_enabled = 1;
-	control_trigger = 1;
-	return 0;
-}
-
 int set_servo_goal_position(uint32_t id,uint8_t*data)
 {
-	// Data Format: [command_id, servo0, servo1, servo2, servo3, servo4, servo5, trigger]
 	uint8_t trigger = data[7];
 	
 	uint8_t position[3];
-    // right hand
 	position[0] = data[1];
 	position[1] = data[2];
 	position[2] = data[3];
-    // left hand
-	// position[0] = data[4];
-	// position[1] = data[5];
-	// position[2] = data[6];
 
 	if (trigger == 1) set_servo_position(position);
 	printf("set servo pos %d %d %d (trigger=%d)\n", 
@@ -315,8 +296,6 @@ void init_finger_positions()
     target_position[INDEX_FINGER]=1000;
     target_position[LITTLE_FINGER]=2500;
     target_position[THUMB2_FINGER]=2600;
-    
-    for (int i = 0; i < JOINT_COUNT; i++) { target_speed[i] = 0; }
     
     for (int i = 0; i < SENSOR_COUNT; i++) { pressure_limits[i] = 0; }
 }
@@ -376,24 +355,26 @@ void run_pid_for_all_fingers()
 
 static void control_logic_loop()
 {
+    uint16_t current_adc_values[JOINT_COUNT];
+    read_adc(current_adc_values);
+
     // Check termination conditions for each motor
     for (int i = 0; i < JOINT_COUNT; i++) {
-        // Check if motor reached target position
-        if (is_motor_at_target_position(i)) {
+         int32_t pid_speed = do_pid(target_position[i], current_adc_values[i], &pid_element[i]);
+
+        if (is_motor_at_target_position(i,current_adc_values[i]) || is_pressure_limit_reached(i))
+        {
             set_motor_speed(i, 0);
             printf("Motor %d reached target position\n", i);
+            continue;
         }
-        // Check if pressure limit reached
-        else if (is_pressure_limit_reached(i)) {
-            set_motor_speed(i, 0);
-            printf("Motor %d stopped due to pressure limit\n", i);
-        }
+        set_motor_speed(i, pid_speed);
     }
     
     // Check if all motors have reached their targets or hit pressure limits
     uint8_t all_completed = 1;
     for (int i = 0; i < JOINT_COUNT; i++) {
-        if (!is_motor_at_target_position(i) && !is_pressure_limit_reached(i)) {
+        if (!is_motor_at_target_position(i, current_adc_values[i]) && !is_pressure_limit_reached(i)) {
             all_completed = 0;
             break;
         }
@@ -401,47 +382,17 @@ static void control_logic_loop()
     
     if (all_completed) {
         control_trigger = 0; // Reset trigger when all motors are done
-        pid_enabled = 0;
         printf("All motors completed movement\n");
     }
 }
 
-static uint8_t is_motor_at_target_position(uint8_t motor_index)
+static uint8_t is_motor_at_target_position(uint8_t motor_index, uint16_t current_adc_value)
 {
-    if (motor_index >= JOINT_COUNT) return 0;
-    
-    uint16_t current_adc_values[JOINT_COUNT];
-    read_adc(current_adc_values);
-    
-    // Get the appropriate feedback channel for this motor
-    uint16_t current_position;
-    switch(motor_index) {
-        case INDEX_FINGER:
-            current_position = current_adc_values[INDEX_FINGER_FEEDBACK_CHANNEL];
-            break;
-        case MIDDLE_FINGER:
-            current_position = current_adc_values[MIDDLE_FINGER_FEEDBACK_CHANNEL];
-            break;
-        case RING_FINGER:
-            current_position = current_adc_values[RING_FINGER_FEEDBACK_CHANNEL];
-            break;
-        case LITTLE_FINGER:
-            current_position = current_adc_values[LITTLE_FINGER_FEEDBACK_CHANNEL];
-            break;
-        case THUMB_FINGER:
-            current_position = current_adc_values[THUMB_FEEDBACK_CHANNEL];
-            break;
-        case THUMB2_FINGER:
-            current_position = current_adc_values[THUMB2_FINGER_FEEDBACK_CHANNEL];
-            break;
-        default:
-            return 0;
-    }
-    
-    int16_t error = (int16_t)target_position[motor_index] - (int16_t)current_position;
+
+    int16_t error = (int16_t)target_position[motor_index] - (int16_t)current_adc_value;
     if (error < 0) error = -error; // Absolute value
     
-    return (error <= 5); // Tolerance: 5
+    return (error <= error_tolerance);
 }
 
 static uint8_t is_pressure_limit_reached(uint8_t sensor_index)

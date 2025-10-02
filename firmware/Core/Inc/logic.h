@@ -86,4 +86,8 @@ void logic_register_read_temperature(float (*sensor_read_temperature_callback)(i
 void logic_register_sensor_init(bool (*sensor_init_callback)(int index));
 uint8_t get_pid_status();
 uint8_t get_trigger_status();
+
+static void control_logic_loop(void);
+static uint8_t is_motor_at_target_position(uint8_t motor_index, uint16_t current_adc_value);
+static uint8_t is_pressure_limit_reached(uint8_t sensor_index);
 #endif /* INC_LOGIC_H_ */

@@ -1,10 +1,10 @@
 
 #include "unity_fixture.h"
 #include "unity.h"
-
+#include <stdbool.h>
 #include "string.h"
 #include <unistd.h>
-
+#include <inttypes.h>
 #include "../Core/Inc/logic.h"
 #include "../Core/Inc/delay.h"
 #include "../Core/Inc/bmp280.h"
@@ -12,6 +12,8 @@
 uint16_t adc_result_mock[6]={0};
 uint8_t can_sent_data[8]={0};
 int can_sent_id=0;
+int adc_ratio = 4096/255;
+int mock_speed[6];
 
 void delay_fast_mock(uint32_t ms)
 {
@@ -20,7 +22,7 @@ void delay_fast_mock(uint32_t ms)
 }
 void set_motor_speed_mock(uint8_t motor,int32_t speed )
 {
-
+    mock_speed[motor] = speed;
 }
 void set_servo_position_mock(uint8_t  *position)
 {
@@ -96,45 +98,81 @@ TEST(LOGIC_TEST_GROUP, when_sensor_reached_max_pressure_trigger_should_change_to
 {
     uint32_t id=0x281;
     // uint8_t data[8]={0,1,0x76,0x06,0,0,0,7};
-    uint8_t speed_data[8]={1,3,76,114,255,173,97,0};
-    uint8_t pressure_data[8]={2,10,10,10,10,10,10,0};
-    uint8_t pid_data[8]={3,3,76,114,0,0,0,0};
-    uint8_t position_data[8]={0,250,76,114,255,173,97,1};
-    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
-    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"");
-    can_data_received( id,speed_data);
+
+    uint8_t pressure_data[8]={11,10,10,10,10,10,10,0};
+    uint8_t pid_data[8]={12,3,76,114,0,0,0,0};
+    uint8_t position_data[8]={10,250,76,114,255,173,97,1};
+
+    logic_init();
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"1");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"2");
+
     can_data_received( id,pressure_data);
     can_data_received( id,pid_data);
     can_data_received( id,position_data);
-    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_pid_status(),__LINE__,"");
-    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"3");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"4");
 
     logic_register_read_pressure(sesnor_read_max_pressure_mock);
 
     logic_loop();
-    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"5");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"6");
 }
 TEST(LOGIC_TEST_GROUP, when_sensor_reached_max_position_trigger_should_change_to_zero)
 {
     uint32_t id=0x281;
     // uint8_t data[8]={0,1,0x76,0x06,0,0,0,7};
-    uint8_t speed_data[8]={1,3,76,114,255,173,97,0};
-    uint8_t pressure_data[8]={2,10,10,10,10,10,10,0};
-    uint8_t pid_data[8]={3,3,76,114,0,0,0,0};
-    uint8_t position_data[8]={0,250,76,114,40,173,97,1};
+
+    uint8_t pressure_data[8]={11,10,10,10,10,10,10,0};
+    uint8_t pid_data[8]={12,3,76,114,0,0,0,0};
+    uint8_t position_data[8]={10,250,76,114,40,173,97,1};
     UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
     UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"");
-    can_data_received( id,speed_data);
+
     can_data_received( id,pressure_data);
     can_data_received( id,pid_data);
     can_data_received( id,position_data);
-    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_pid_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
     UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"");
 
-    uint16_t adc_threashold[6] = {248,75,114,42,170,100};
+    uint16_t adc_threashold[6] = {250*adc_ratio,76*adc_ratio,114*adc_ratio,40*adc_ratio,173*adc_ratio,97*adc_ratio};
     memcpy(adc_result_mock,adc_threashold,6 * sizeof(uint16_t));
     logic_register_adc(read_adc_mock);
 
     logic_loop();
     UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
+}
+TEST(LOGIC_TEST_GROUP, when_sensor_reached_middle_position_motor_speed_is_not_zero)
+{
+    uint32_t id=0x281;
+    // uint8_t data[8]={0,1,0x76,0x06,0,0,0,7};
+
+    uint8_t pressure_data[8]={11,10,10,10,10,10,10,0};
+    uint8_t pid_data[8]={12,3,76,114,0,0,0,0};
+    uint8_t position_data[8]={10,250,76,114,40,173,97,1};
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"");
+
+    can_data_received( id,pressure_data);
+    can_data_received( id,pid_data);
+    can_data_received( id,position_data);
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"");
+
+    uint16_t adc_threashold[6] = {100*adc_ratio,51*adc_ratio,200*adc_ratio,80*adc_ratio,100*adc_ratio,80*adc_ratio};
+    memcpy(adc_result_mock,adc_threashold,6 * sizeof(uint16_t));
+    logic_register_adc(read_adc_mock);
+
+    logic_loop();
+    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"");
+
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[0],0,__LINE__,"0");
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[1],0,__LINE__,"1");
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[2],0,__LINE__,"2");
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[3],0,__LINE__,"3");
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[4],0,__LINE__,"4");
+    UNITY_TEST_ASSERT_NOT_EQUAL_INT(mock_speed[5],0,__LINE__,"5");
 }
