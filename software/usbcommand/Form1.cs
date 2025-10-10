@@ -1021,7 +1021,32 @@ public static byte[] StrToByteArray(string str)
 
 
         }
+        float read_bmp_channel(byte channel)
+        {
+            float bmp = 0;
 
+            byte[] tx_data = new byte[65];
+            Byte[] rx_data = new Byte[65];
+            tx_data[0] = 5;
+            tx_data[1] = channel;
+
+            can_send(0x281, tx_data);
+            Thread.Sleep(10);
+            for (int i = 0; i < 200; i++)
+            {
+                if (can_read(ref rx_data))
+                {
+
+                    float value = BitConverter.ToSingle(rx_data, 3);
+                    return value;
+                }
+            }
+
+
+            return -1;
+
+
+        }
         Int32 set_position(UInt16 value)
         {
          
@@ -1057,6 +1082,17 @@ public static byte[] StrToByteArray(string str)
         private void Btn_set_position_Click(object sender, EventArgs e)
         {
             set_position((UInt16)num_set_position.Value);
+        }
+
+        private void btn_read_pressure_Click(object sender, EventArgs e)
+        {
+
+            lab_pressure_values.Text = read_bmp_channel((byte)0).ToString();
+            lab_pressure_values.Text += " " + read_bmp_channel((byte)1).ToString();
+            lab_pressure_values.Text += " " + read_bmp_channel((byte)2).ToString();
+            lab_pressure_values.Text += " " + read_bmp_channel((byte)3).ToString();
+            lab_pressure_values.Text += " " + read_bmp_channel((byte)4).ToString();
+            lab_pressure_values.Text += " " + read_bmp_channel((byte)5).ToString();
         }
     }
 }

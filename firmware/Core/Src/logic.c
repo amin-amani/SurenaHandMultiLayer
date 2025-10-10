@@ -62,6 +62,7 @@ const INT_COMMAND_TYPE command_list[] =
     {5, get_pressure_values},
     {6, set_servo_goal_position},
 
+
     {10, set_finger_goal_position},
     {11, set_pressure_limits},
     {12, set_finger_pid_values},
@@ -167,20 +168,11 @@ int get_adc_values(uint32_t id , uint8_t*data)
 
 int get_pressure_values(uint32_t id , uint8_t*data)
 {	
-	uint8_t can_data[8];
-	
-	// Send pressure values for all sensors that are requested (non-zero in data[1-6])
-	for (int i = 0; i < SENSOR_COUNT; i++) {
-		uint32_t pressure = (uint32_t)bmp_sensor_value[i].pressure;
-		can_data[0] = (pressure >> 24) & 0xFF; // MSB
-		can_data[1] = (pressure >> 16) & 0xFF;
-		can_data[2] = (pressure >> 8) & 0xFF;
-		can_data[3] = pressure & 0xFF;         // LSB
-		// can_data[4] = 0; can_data[5] = 0; can_data[6] = 0; can_data[7] = 0;
-		can_send(id, can_data);
-	}
+	uint8_t can_data[8] = {0};
 
-    return 0;
+	memcpy(&can_data[0], &(bmp_sensor_value[data[1]].pressure), sizeof(float));
+	can_send(id, can_data);
+	return 0;
 }
 
 int set_finger_goal_position_amani(uint32_t id,uint8_t*data)

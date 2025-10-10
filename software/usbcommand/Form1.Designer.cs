@@ -87,6 +87,9 @@
             this.label20 = new System.Windows.Forms.Label();
             this.Btn_set_position = new System.Windows.Forms.Button();
             this.num_set_position = new System.Windows.Forms.NumericUpDown();
+            this.btn_read_pressure = new System.Windows.Forms.Button();
+            this.label13 = new System.Windows.Forms.Label();
+            this.lab_pressure_values = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trk_motor_position)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_motor_index)).BeginInit();
@@ -119,7 +122,7 @@
             // 
             this.lab_status.AutoSize = true;
             this.lab_status.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.lab_status.Location = new System.Drawing.Point(12, 400);
+            this.lab_status.Location = new System.Drawing.Point(12, 463);
             this.lab_status.Name = "lab_status";
             this.lab_status.Size = new System.Drawing.Size(24, 25);
             this.lab_status.TabIndex = 13;
@@ -133,6 +136,7 @@
             this.btn_can1send.TabIndex = 19;
             this.btn_can1send.Text = "CAN1Send";
             this.btn_can1send.UseVisualStyleBackColor = true;
+            this.btn_can1send.Visible = false;
             this.btn_can1send.Click += new System.EventHandler(this.btn_can1send_Click);
             // 
             // btn_can1read
@@ -143,6 +147,7 @@
             this.btn_can1read.TabIndex = 20;
             this.btn_can1read.Text = "CAN Read";
             this.btn_can1read.UseVisualStyleBackColor = true;
+            this.btn_can1read.Visible = false;
             this.btn_can1read.Click += new System.EventHandler(this.btn_can1read_Click);
             // 
             // set_baud1
@@ -153,6 +158,7 @@
             this.set_baud1.TabIndex = 22;
             this.set_baud1.Text = "SetBaud1";
             this.set_baud1.UseVisualStyleBackColor = true;
+            this.set_baud1.Visible = false;
             this.set_baud1.Click += new System.EventHandler(this.button2_Click);
             // 
             // dataA0
@@ -227,6 +233,7 @@
             this.can2_send.TabIndex = 32;
             this.can2_send.Text = "CAN2Send";
             this.can2_send.UseVisualStyleBackColor = true;
+            this.can2_send.Visible = false;
             this.can2_send.Click += new System.EventHandler(this.can2_send_Click);
             // 
             // dataA10
@@ -304,6 +311,7 @@
             this.cmb_baud.Size = new System.Drawing.Size(121, 21);
             this.cmb_baud.TabIndex = 41;
             this.cmb_baud.Text = "1000000";
+            this.cmb_baud.Visible = false;
             // 
             // set_baud2
             // 
@@ -313,6 +321,7 @@
             this.set_baud2.TabIndex = 45;
             this.set_baud2.Text = "SetBaud2";
             this.set_baud2.UseVisualStyleBackColor = true;
+            this.set_baud2.Visible = false;
             this.set_baud2.Click += new System.EventHandler(this.set_baud2_Click);
             // 
             // cmb_baud2
@@ -325,6 +334,7 @@
             this.cmb_baud2.Size = new System.Drawing.Size(121, 21);
             this.cmb_baud2.TabIndex = 46;
             this.cmb_baud2.Text = "1000000";
+            this.cmb_baud2.Visible = false;
             // 
             // txt_can1_id
             // 
@@ -380,6 +390,7 @@
             this.groupBox1.TabIndex = 49;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "SEND";
+            this.groupBox1.Visible = false;
             // 
             // label12
             // 
@@ -491,22 +502,24 @@
             // 
             // btn_text_clear
             // 
-            this.btn_text_clear.Location = new System.Drawing.Point(601, 560);
+            this.btn_text_clear.Location = new System.Drawing.Point(691, 685);
             this.btn_text_clear.Name = "btn_text_clear";
             this.btn_text_clear.Size = new System.Drawing.Size(60, 23);
             this.btn_text_clear.TabIndex = 50;
             this.btn_text_clear.Text = "Clear";
             this.btn_text_clear.UseVisualStyleBackColor = true;
+            this.btn_text_clear.Visible = false;
             this.btn_text_clear.Click += new System.EventHandler(this.btn_text_clear_Click);
             // 
             // btn_auto_read
             // 
-            this.btn_auto_read.Location = new System.Drawing.Point(847, 482);
+            this.btn_auto_read.Location = new System.Drawing.Point(754, 627);
             this.btn_auto_read.Name = "btn_auto_read";
             this.btn_auto_read.Size = new System.Drawing.Size(75, 44);
             this.btn_auto_read.TabIndex = 52;
             this.btn_auto_read.Text = "Auto Read OFF";
             this.btn_auto_read.UseVisualStyleBackColor = true;
+            this.btn_auto_read.Visible = false;
             this.btn_auto_read.Click += new System.EventHandler(this.btn_auto_read_Click_1);
             // 
             // skinEngine1
@@ -521,6 +534,7 @@
             this.txt_recieved_data.Size = new System.Drawing.Size(371, 133);
             this.txt_recieved_data.TabIndex = 54;
             this.txt_recieved_data.Text = "";
+            this.txt_recieved_data.Visible = false;
             // 
             // btn_get_adc
             // 
@@ -555,7 +569,7 @@
             // 
             // trk_motor_position
             // 
-            this.trk_motor_position.Location = new System.Drawing.Point(17, 275);
+            this.trk_motor_position.Location = new System.Drawing.Point(17, 338);
             this.trk_motor_position.Maximum = 1900;
             this.trk_motor_position.Minimum = -1900;
             this.trk_motor_position.Name = "trk_motor_position";
@@ -566,7 +580,7 @@
             // num_motor_index
             // 
             this.num_motor_index.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.num_motor_index.Location = new System.Drawing.Point(331, 185);
+            this.num_motor_index.Location = new System.Drawing.Point(331, 248);
             this.num_motor_index.Maximum = new decimal(new int[] {
             5,
             0,
@@ -579,7 +593,7 @@
             // btn_stop_all_motors
             // 
             this.btn_stop_all_motors.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_stop_all_motors.Location = new System.Drawing.Point(335, 269);
+            this.btn_stop_all_motors.Location = new System.Drawing.Point(335, 332);
             this.btn_stop_all_motors.Name = "btn_stop_all_motors";
             this.btn_stop_all_motors.Size = new System.Drawing.Size(97, 51);
             this.btn_stop_all_motors.TabIndex = 70;
@@ -590,7 +604,7 @@
             // num_motor_position
             // 
             this.num_motor_position.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.num_motor_position.Location = new System.Drawing.Point(331, 222);
+            this.num_motor_position.Location = new System.Drawing.Point(331, 285);
             this.num_motor_position.Maximum = new decimal(new int[] {
             1900,
             0,
@@ -615,7 +629,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(40, 191);
+            this.label19.Location = new System.Drawing.Point(40, 254);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(125, 25);
             this.label19.TabIndex = 72;
@@ -625,7 +639,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(40, 220);
+            this.label20.Location = new System.Drawing.Point(40, 283);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(71, 25);
             this.label20.TabIndex = 73;
@@ -634,7 +648,7 @@
             // Btn_set_position
             // 
             this.Btn_set_position.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Btn_set_position.Location = new System.Drawing.Point(30, 337);
+            this.Btn_set_position.Location = new System.Drawing.Point(30, 400);
             this.Btn_set_position.Name = "Btn_set_position";
             this.Btn_set_position.Size = new System.Drawing.Size(135, 51);
             this.Btn_set_position.TabIndex = 74;
@@ -645,7 +659,7 @@
             // num_set_position
             // 
             this.num_set_position.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.num_set_position.Location = new System.Drawing.Point(331, 348);
+            this.num_set_position.Location = new System.Drawing.Point(331, 411);
             this.num_set_position.Maximum = new decimal(new int[] {
             4096,
             0,
@@ -660,11 +674,45 @@
             0,
             0});
             // 
+            // btn_read_pressure
+            // 
+            this.btn_read_pressure.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.btn_read_pressure.Location = new System.Drawing.Point(17, 184);
+            this.btn_read_pressure.Name = "btn_read_pressure";
+            this.btn_read_pressure.Size = new System.Drawing.Size(148, 54);
+            this.btn_read_pressure.TabIndex = 76;
+            this.btn_read_pressure.Text = "Read BMP";
+            this.btn_read_pressure.UseVisualStyleBackColor = true;
+            this.btn_read_pressure.Click += new System.EventHandler(this.btn_read_pressure_Click);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(186, 173);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(170, 25);
+            this.label13.TabIndex = 77;
+            this.label13.Text = "Pressure Values";
+            // 
+            // lab_pressure_values
+            // 
+            this.lab_pressure_values.AutoSize = true;
+            this.lab_pressure_values.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lab_pressure_values.Location = new System.Drawing.Point(201, 213);
+            this.lab_pressure_values.Name = "lab_pressure_values";
+            this.lab_pressure_values.Size = new System.Drawing.Size(114, 25);
+            this.lab_pressure_values.TabIndex = 78;
+            this.lab_pressure_values.Text = "0 0 0 0 0 0";
+            // 
             // frmmain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(568, 463);
+            this.ClientSize = new System.Drawing.Size(1163, 840);
+            this.Controls.Add(this.lab_pressure_values);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.btn_read_pressure);
             this.Controls.Add(this.num_set_position);
             this.Controls.Add(this.Btn_set_position);
             this.Controls.Add(this.label20);
@@ -765,6 +813,9 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button Btn_set_position;
         private System.Windows.Forms.NumericUpDown num_set_position;
+        private System.Windows.Forms.Button btn_read_pressure;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label lab_pressure_values;
     }
 }
 

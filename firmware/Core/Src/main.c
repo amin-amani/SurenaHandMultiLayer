@@ -627,7 +627,7 @@ int hw_can_send(uint32_t id,uint8_t *data)
 	  TxHeader.StdId =id;
 	  TxHeader.RTR = CAN_RTR_DATA;
 	  TxHeader.IDE = CAN_ID_STD;
-	  TxHeader.DLC = 2;
+	  TxHeader.DLC = 8;
 	  TxHeader.TransmitGlobalTime = DISABLE;
 
 	  /* Request transmission */
