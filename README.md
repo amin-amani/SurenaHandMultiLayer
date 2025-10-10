@@ -3,7 +3,10 @@
        src="https://scan.coverity.com/projects/32261/badge.svg"/>
 </a>
 
-<a href="https://codescene.io/projects/72155"><img src="https://codescene.io/projects/72155/status-badges/average-code-health" alt="Average Code Health"></a>
+<a href="https://codescene.io/projects/72155" >
+  <img alt="Coverity Scan Build Status"
+       src="https://codescene.io/projects/72155/status-badges/average-code-health"/>
+</a>
 
 # SurenaHandMultiLayer
 
