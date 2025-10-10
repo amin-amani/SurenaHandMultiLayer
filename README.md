@@ -2,9 +2,9 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/32261/badge.svg"/>
 </a>
-
+<a href="https://codescene.io/projects/72155"><img src="https://codescene.io/projects/72155/status-badges/average-code-health" alt="Average Code Health"></a>
 <a href="https://codescene.io/projects/72155"><img src="https://codescene.io/projects/72155/status-badges/hotspot-code-health" alt="Hotspot Code Health"></a>
-
+<a href="https://codescene.io/projects/72155"><img src="https://codescene.io/images/analyzed-by-codescene-badge.svg" alt="general"></a>
 # SurenaHandMultiLayer
 
 This project provides firmware to control a robotic hand with multiple fingers. It integrates motor control, sensor feedback, and communication over CAN bus, enabling precise manipulation and customization for each finger.
