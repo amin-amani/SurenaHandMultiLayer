@@ -215,7 +215,7 @@ int set_pressure_limits(uint32_t id,uint8_t*data)
 {
 	// Each sensor value represents target pressure for that sensor
 	for (int i = 0; i < SENSOR_COUNT; i++) {
-        pressure_limits[i] = data[i+1] * 1; // Scale up for better precision
+        pressure_limits[i] = data[i+1] * 900; // Scale up for better precision
 		printf("set pressure[%d] = %d\n", i, pressure_limits[i]);
 	}
 	
@@ -285,16 +285,19 @@ void init_finger_positions()
 	pid_enabled=0;
 	control_trigger=0;
 
-    target_position[INDEX_FINGER]=1000;
-    target_position[LITTLE_FINGER]=2500;
-    target_position[THUMB2_FINGER]=2600;
+    target_position[INDEX_FINGER]=1600;
+    target_position[MIDDLE_FINGER]=2000;
+    target_position[RING_FINGER]=950;
+    target_position[LITTLE_FINGER]=2400;
+    target_position[THUMB_FINGER]=2000;
+    target_position[THUMB2_FINGER]=2500;
     
     for (int i = 0; i < SENSOR_COUNT; i++) { pressure_limits[i] = 0; }
 }
 void init_servo_positions(void)
 {
 	uint8_t servo_init_angles[]={90,90,90};
-//	set_servo_position(servo_init_angles);
+	set_servo_position(servo_init_angles);
 }
 void init_pressure_sensors()
 {
