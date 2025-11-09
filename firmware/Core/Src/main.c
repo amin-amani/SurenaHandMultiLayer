@@ -50,6 +50,7 @@ CAN_HandleTypeDef hcan;
 
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
@@ -68,6 +69,7 @@ static void MX_CAN_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 void hw_read_adc(uint16_t*value);
 int  hw_can_send(uint32_t id,uint8_t *data);
@@ -80,7 +82,7 @@ void hw_set_motor_speed(uint8_t motor,int32_t speed );
 
 void SelectSensor(int8_t index);
 void SpiWrite(uint8_t index,uint8_t *data,int len);
-
+void hw_toggle_test_pin();
 void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen);
 void hw_set_servo_position(uint8_t  *position);
 BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
@@ -95,6 +97,11 @@ BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
+{
+	run_pid_for_all_fingers();
+
+}
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	__NOP();
@@ -152,6 +159,7 @@ int main(void)
   MX_TIM4_Init();
   MX_SPI1_Init();
   MX_TIM3_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 	  printf("start app\n");
      hw_select_driver_motor(7);
@@ -185,13 +193,18 @@ int main(void)
   logic_register_read_pressure(bmp280_read_pressure);
   logic_register_read_temperature(bmp280_read_temperature);
   logic_register_sensor_init(bmp280_init);
+  logic_register_hw_pin(hw_toggle_test_pin);
   logic_init();
   hw_set_motor_speed(7,0);
+
+  HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
+  HAL_TIM_Base_Start_IT(&htim1);
   while (1)
   {
 
 	  logic_loop();
-
+//	  hw_toggle_test_pin();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -424,6 +437,52 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 360;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 2000;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
   * @brief TIM3 Initialization Function
   * @param None
   * @retval None
@@ -585,6 +644,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, SPI_SEL1_Pin|SPI_SEL2_Pin|DIRVER_DIRECTION_Pin|DRIVER_SELECT0_Pin
                           |DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin|SPI_SEL0_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : SPI_SEL1_Pin SPI_SEL2_Pin SPI_SEL0_Pin */
   GPIO_InitStruct.Pin = SPI_SEL1_Pin|SPI_SEL2_Pin|SPI_SEL0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -598,6 +660,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -702,6 +771,11 @@ void SpiWrite(uint8_t index,uint8_t *data,int len)
 	HAL_SPI_Transmit(&hspi1, data, len, 1000); //CONFIG
 //	GPIOB->ODR|=1<<9;
 	SelectSensor(index);
+}
+
+void hw_toggle_test_pin()
+{
+ GPIOA->ODR ^= 1<<9;
 }
 
 void SPIReadWrite(uint8_t index,uint8_t *txBuffer,uint8_t txLen,uint8_t *rxBuffer,uint8_t rxLen)

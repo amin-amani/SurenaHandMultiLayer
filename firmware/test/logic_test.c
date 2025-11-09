@@ -90,9 +90,28 @@ TEST(LOGIC_TEST_GROUP, when_log_init_call_pid_elements_is_not_null)
 
 TEST(LOGIC_TEST_GROUP, test_under_const)
 {
+    uint32_t id=0x281;
+    // uint8_t data[8]={0,1,0x76,0x06,0,0,0,7};
 
+    uint8_t pressure_data[8]={11,10,10,10,10,10,10,0};
+    uint8_t pid_data[8]={12,3,76,114,0,0,0,0};
+    uint8_t position_data[8]={10,250,76,114,255,173,97,1};
 
-  logic_loop();
+    logic_init();
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"1");
+    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_trigger_status(),__LINE__,"2");
+
+//    can_data_received( id,pressure_data);
+//    can_data_received( id,pid_data);
+    can_data_received( id,position_data);
+//    UNITY_TEST_ASSERT_EQUAL_UINT8(0,get_pid_status(),__LINE__,"3");
+//    UNITY_TEST_ASSERT_EQUAL_UINT8(1,get_trigger_status(),__LINE__,"4");
+
+//    logic_register_read_pressure(sesnor_read_max_pressure_mock);
+for(int i=0;i<1000;i++)
+    logic_loop();
+
+//  logic_loop();
 }
 TEST(LOGIC_TEST_GROUP, when_sensor_reached_max_pressure_trigger_should_change_to_zero)
 {

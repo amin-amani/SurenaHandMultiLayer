@@ -87,6 +87,8 @@ void logic_register_set_servo_position(void set_servo_position_callback(uint8_t 
 void logic_register_read_pressure(float (*sensor_read_pressure_callback)(int index));
 void logic_register_read_temperature(float (*sensor_read_temperature_callback)(int index));
 void logic_register_sensor_init(bool (*sensor_init_callback)(int index));
+void logic_register_hw_pin(void (*toggle_test_pin_callback)(void));
+
 uint8_t get_pid_status();
 uint8_t get_trigger_status();
 
