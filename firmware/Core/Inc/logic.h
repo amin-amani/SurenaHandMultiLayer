@@ -23,23 +23,23 @@
 
 
 
-#define INDEX_MAX 1625 //open
-#define INDEX_MIN 1060  //close
+#define INDEX_MAX 1550 //open
+#define INDEX_MIN 1162  //close
 
 #define MIDDLE_MAX 2845 //open
-#define MIDDLE_MIN 1890  //close
+#define MIDDLE_MIN 2340  //close
 
-#define RING_MAX 1020  //open
-#define RING_MIN 550  //close
+#define RING_MAX 1814  //open
+#define RING_MIN 671  //close
 
 #define LITTLE_MAX 2695 //open
-#define LITTLE_MIN 2135 //close
+#define LITTLE_MIN 2345 //close
 
-#define THUMB_MAX 2030 //open
-#define THUMB_MIN 1760 //close
+#define THUMB_MAX 2100 //open
+#define THUMB_MIN 1750 //close
 
-#define THUMB2_MAX 3000 //open
-#define THUMB2_MIN 2000 //close
+#define THUMB2_MAX 2800 //open
+#define THUMB2_MIN 2200 //close
 
 #define INDEX_FINGER    (0) //correct index ok
 #define MIDDLE_FINGER   (1) //ok
