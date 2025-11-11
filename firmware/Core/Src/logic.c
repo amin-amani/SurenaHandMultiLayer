@@ -205,12 +205,12 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	// Each motor value represents position for that finger
 	uint8_t trigger = data[7];
 	
-	target_position[INDEX_FINGER]  = INDEX_MIN + data[1] * (INDEX_MAX-INDEX_MIN) / 255;
-	target_position[MIDDLE_FINGER] = MIDDLE_MIN + data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
-	target_position[RING_FINGER]   = RING_MIN + data[3] * (RING_MAX-RING_MIN) / 255;
-	target_position[LITTLE_FINGER] = LITTLE_MIN + data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
-	target_position[THUMB_FINGER]  = THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
-	target_position[THUMB2_FINGER] = THUMB2_MIN + data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
+	target_position[INDEX_FINGER]  = 1340;// INDEX_MIN + data[1] * (INDEX_MAX-INDEX_MIN) / 255;
+	target_position[MIDDLE_FINGER] = 1890;//MIDDLE_MIN + data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
+	target_position[RING_FINGER]   = 1300;//RING_MIN + data[3] * (RING_MAX-RING_MIN) / 255;
+	target_position[LITTLE_FINGER] = 2500;//LITTLE_MIN + data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
+	target_position[THUMB_FINGER]  = 1880;//THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
+	target_position[THUMB2_FINGER] = 2480;//THUMB2_MIN + data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
 
 //	for (int i = 0; i < JOINT_COUNT; i++) {
 //        target_position[i] = data[i+1] * 4095;
@@ -277,10 +277,10 @@ void init_pid_elements()
 {
     for(int i=0;i<JOINT_COUNT;i++)
     {
-		pid_element[i].dt=10;
+		pid_element[i].dt=2;
 		pid_element[i].kd=0;
 		pid_element[i].ki=0;
-		pid_element[i].kp=3;
+		pid_element[i].kp=100;
 		pid_element[i].max_command=3900;
 		pid_element[i].min_command=50;
 		pid_element[i].max_iterm=1200;
@@ -350,19 +350,19 @@ void run_pid_for_all_fingers()
 {
 	static int step = 0;
 	uint16_t values[JOINT_COUNT] = {0};
-	toggle_test_pin();
+
 	if(!pid_enabled)
 	{
 	return  ;
 	}
 	read_adc(values);
 
-	 int phase = step / 5;
+	 int phase = step / 10;
 
 	 switch (phase)
 	 {
 		 case 0:
-			// printf("stp1\n");
+				toggle_test_pin();
 			 set_motor_speed(INDEX_FINGER , do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
 			 break;
 		 case 1:
@@ -395,7 +395,7 @@ void run_pid_for_all_fingers()
 	 }
 
 	 step++;
-	 if (step >= 30)
+	 if (step >= 70)
 	 {
 		 step = 0;
 	 }
