@@ -200,10 +200,18 @@ int main(void)
   HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
   HAL_TIM_Base_Start_IT(&htim1);
+  int iter=0;
   while (1)
   {
 
-	  logic_loop();
+	  hw_set_motor_speed((iter%7),1900);
+	  printf("%d\n",(iter%7));
+	  HAL_Delay(2000);
+	  hw_set_motor_speed((iter%7),-1900);
+	  HAL_Delay(2000);
+	  iter++;
+
+	//  logic_loop();
 //	  hw_toggle_test_pin();
     /* USER CODE END WHILE */
 
