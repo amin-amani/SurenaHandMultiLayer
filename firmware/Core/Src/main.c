@@ -51,6 +51,7 @@ CAN_HandleTypeDef hcan;
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
@@ -58,6 +59,7 @@ TIM_HandleTypeDef htim4;
 uint16_t ADCResult[5];
 int count=0;
 int i=0;
+int pwm1=1000,pwm2=1000;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,6 +72,7 @@ static void MX_TIM4_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void hw_read_adc(uint16_t*value);
 int  hw_can_send(uint32_t id,uint8_t *data);
@@ -97,9 +100,66 @@ BMP280_CALLBACK_STRUCT_TYPE bmp_sensor=
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void SysTick_Initialize(uint32_t ticks)
+{
+    SysTick->CTRL = 0;  // Stop SysTick
+    SysTick->LOAD = ticks - 1;
+    SysTick->VAL  = 0;
+
+    NVIC_SetPriority(SysTick_IRQn, 15);
+
+    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
+                    SysTick_CTRL_TICKINT_Msk   |
+                    SysTick_CTRL_ENABLE_Msk;
+}
+
+void systick_interrupt_handler()
+{
+//every 20ms
+	run_pid_for_all_fingers();
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 {
-	run_pid_for_all_fingers();
+	static int step1 = 0;
+	static int step2 = 0;
+	if(htim1->Instance == TIM1)
+	{
+
+		if(step1 == 0)
+		{
+
+			GPIOB->ODR^=1<<7;
+			TIM1->ARR = pwm1;
+			step1 = 1;
+		}
+		else if(step1 == 1)
+		{
+
+			GPIOB->ODR^=1<<7;
+			TIM1->ARR = 19500-pwm1;
+			step1 = 0;
+		}
+
+	}
+	if(htim1->Instance == TIM2)
+	{
+		if(step2 == 0)
+		{
+
+			GPIOB->ODR^=1<<6;
+			TIM2->ARR = pwm2;
+			step2 = 1;
+		}
+		else if(step2 == 1)
+		{
+
+			GPIOB->ODR^=1<<6;
+			TIM2->ARR = 19500-pwm2;
+			step2 = 0;
+		}
+
+	}
 
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
@@ -160,6 +220,7 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM3_Init();
   MX_TIM1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 	  printf("start app\n");
      hw_select_driver_motor(7);
@@ -199,7 +260,10 @@ int main(void)
 
   HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
+  HAL_NVIC_EnableIRQ(TIM2_IRQn);
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim2);
+  SysTick_Initialize(60000);
   while (1)
   {
 
@@ -455,9 +519,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 360;
+  htim1.Init.Prescaler = 36;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 200;
+  htim1.Init.Period = 1000;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -479,6 +543,51 @@ static void MX_TIM1_Init(void)
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 36;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -586,19 +695,9 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 100;
+  sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.Pulse = 1900;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.Pulse = 100;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
@@ -644,13 +743,16 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SPI_SEL1_Pin|SPI_SEL2_Pin|DIRVER_DIRECTION_Pin|DRIVER_SELECT0_Pin
-                          |DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin|SPI_SEL0_Pin, GPIO_PIN_RESET);
+                          |DRIVER_SELECT1_Pin|DRIVER_SELECT2_Pin|GPIO_PIN_6|GPIO_PIN_7
+                          |SPI_SEL0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : SPI_SEL1_Pin SPI_SEL2_Pin SPI_SEL0_Pin */
-  GPIO_InitStruct.Pin = SPI_SEL1_Pin|SPI_SEL2_Pin|SPI_SEL0_Pin;
+  /*Configure GPIO pins : SPI_SEL1_Pin SPI_SEL2_Pin PB6 PB7
+                           SPI_SEL0_Pin */
+  GPIO_InitStruct.Pin = SPI_SEL1_Pin|SPI_SEL2_Pin|GPIO_PIN_6|GPIO_PIN_7
+                          |SPI_SEL0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -727,9 +829,11 @@ void hw_select_driver_motor(uint8_t value)
 
 void hw_set_servo_position(uint8_t  *position)
 {
-	TIM4->CCR1 = 50+((position[0]>190)?190:position[0]);
-	TIM4->CCR2 = 50+((position[1]>190)?190:position[1]);
+//	TIM4->CCR1 = 50+((position[0]>190)?190:position[0]);
+//	TIM4->CCR2 = 50+((position[1]>190)?190:position[1]);
 	TIM3->CCR2 = 50+((position[2]>190)?190:position[2]);
+	pwm1 = 1000+position[0];
+	pwm2 = 1000+position[1];
 
 }
 //minus means clockwise

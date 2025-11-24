@@ -23,17 +23,17 @@
 
 
 
-#define INDEX_MAX 1550 //open
-#define INDEX_MIN 1162  //close
+#define INDEX_MAX 1570 //open
+#define INDEX_MIN 840  //close
 
-#define MIDDLE_MAX 2845 //open
-#define MIDDLE_MIN 2340  //close
+#define MIDDLE_MAX 2780 //open
+#define MIDDLE_MIN 2160  //close
 
-#define RING_MAX 1814  //open
-#define RING_MIN 671  //close
+#define RING_MAX 960  //open
+#define RING_MIN 360  //close
 
-#define LITTLE_MAX 2695 //open
-#define LITTLE_MIN 2345 //close
+#define LITTLE_MAX 2590 //open
+#define LITTLE_MIN 1910 //close
 
 #define THUMB_MAX 2100 //open
 #define THUMB_MIN 1750 //close

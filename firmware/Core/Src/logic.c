@@ -193,6 +193,7 @@ int set_finger_goal_position_amani(uint32_t id,uint8_t*data)
 
     if (data[1] >= JOINT_COUNT) return -1;
 	target_position[data[1]] = position;
+
     pid_enabled=1;
 
     printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
@@ -205,12 +206,12 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	// Each motor value represents position for that finger
 	uint8_t trigger = data[7];
 	
-	target_position[INDEX_FINGER]  = 1340;// INDEX_MIN + data[1] * (INDEX_MAX-INDEX_MIN) / 255;
-	target_position[MIDDLE_FINGER] = 1890;//MIDDLE_MIN + data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
-	target_position[RING_FINGER]   = 1300;//RING_MIN + data[3] * (RING_MAX-RING_MIN) / 255;
-	target_position[LITTLE_FINGER] = 2500;//LITTLE_MIN + data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
-	target_position[THUMB_FINGER]  = 1880;//THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
-	target_position[THUMB2_FINGER] = 2480;//THUMB2_MIN + data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
+	target_position[INDEX_FINGER]  = INDEX_MIN + data[1] * (INDEX_MAX-INDEX_MIN) / 255;
+	target_position[MIDDLE_FINGER] = MIDDLE_MIN + data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
+	target_position[RING_FINGER]   = RING_MIN + data[3] * (RING_MAX-RING_MIN) / 255;
+	target_position[LITTLE_FINGER] = LITTLE_MIN + data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
+	target_position[THUMB_FINGER]  = THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
+	target_position[THUMB2_FINGER] = THUMB2_MIN + data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
 
 //	for (int i = 0; i < JOINT_COUNT; i++) {
 //        target_position[i] = data[i+1] * 4095;
@@ -244,7 +245,9 @@ int set_finger_pid_values(uint32_t id,uint8_t*data)
         pid_element[i].kd = data[3] / 100.0f;
 		printf("set PID Kp = %f, Ki = %f, Kd = %f\n", pid_element[i].kp, pid_element[i].ki, pid_element[i].kd);
 	}
-	pid_element[1].kp *= -1;
+	pid_element[0].kp *= -1;
+	pid_element[2].kp *= -1;
+	pid_element[3].kp *= -1;
 	pid_element[4].kp *= -1;
 	pid_element[5].kp *= -1;
 	
@@ -288,7 +291,9 @@ void init_pid_elements()
 		pid_element[i].max_output=1900;
 		pid_element[i].min_output=-1900;
     }
-    pid_element[1].kp *= -1;
+    pid_element[0].kp *= -1;
+    pid_element[2].kp *= -1;
+    pid_element[3].kp *= -1;
     pid_element[4].kp *= -1;
     pid_element[5].kp *= -1;
 }
