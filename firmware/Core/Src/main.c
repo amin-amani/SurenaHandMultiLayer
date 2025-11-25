@@ -832,8 +832,8 @@ void hw_set_servo_position(uint8_t  *position)
 //	TIM4->CCR1 = 50+((position[0]>190)?190:position[0]);
 //	TIM4->CCR2 = 50+((position[1]>190)?190:position[1]);
 	TIM3->CCR2 = 50+((position[2]>190)?190:position[2]);
-	pwm1 = 1000+position[0];
-	pwm2 = 1000+position[1];
+	pwm1 = 488+((position[0]>190)?190:(position[0]<20)?20:position[0])*10;
+	pwm2 = 488+((position[1]>190)?190:(position[1]<20)?20:position[1])*10;
 
 }
 //minus means clockwise
