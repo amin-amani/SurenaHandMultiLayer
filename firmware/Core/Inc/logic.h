@@ -41,6 +41,9 @@
 #define THUMB2_MAX 2800 //open
 #define THUMB2_MIN 2200 //close
 
+
+
+
 #define INDEX_FINGER    (0) //correct index ok
 #define MIDDLE_FINGER   (1) //ok
 #define RING_FINGER     (2) //hardware test pass + open -close

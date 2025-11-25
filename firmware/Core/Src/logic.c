@@ -48,10 +48,12 @@ int set_finger_goal_position_amani(uint32_t id,uint8_t*data);
 static pid_element_type pid_element[JOINT_COUNT];
 static uint32_t target_position[JOINT_COUNT];
 static uint32_t pressure_limits[SENSOR_COUNT];
-static uint16_t pid_interval=50;
+
 static uint8_t pid_enabled=0;
 static uint8_t control_trigger=0;
 const int error_tolerance = 50;
+int max_limits[6]={INDEX_MAX,MIDDLE_MAX,RING_MAX,LITTLE_MAX,THUMB_MAX,THUMB2_MAX};
+int min_limits[6]={INDEX_MIN,MIDDLE_MIN,RING_MIN,LITTLE_MIN ,THUMB_MIN,THUMB2_MIN};
 
 const INT_COMMAND_TYPE command_list[] =
 {
@@ -192,6 +194,9 @@ int set_finger_goal_position_amani(uint32_t id,uint8_t*data)
     position |= data[2];
 
     if (data[1] >= JOINT_COUNT) return -1;
+    if(position > max_limits[data[1]]) position = max_limits[data[1]];
+    if(position < min_limits[data[1]]) position = min_limits[data[1]];
+
 	target_position[data[1]] = position;
 
     pid_enabled=1;
@@ -398,7 +403,7 @@ void run_pid_for_all_fingers()
 	 }
 
 	 step++;
-	 if (step >= 70)
+	 if (step >= 60)
 	 {
 		 step = 0;
 	 }
