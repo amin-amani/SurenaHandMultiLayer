@@ -51,7 +51,7 @@ static uint32_t pressure_limits[SENSOR_COUNT];
 
 static uint8_t pid_enabled=0;
 static uint8_t control_trigger=0;
-const int error_tolerance = 50;
+const int error_tolerance = 20;
 int max_limits[6]={INDEX_MAX,MIDDLE_MAX,RING_MAX,LITTLE_MAX,THUMB_MAX,THUMB2_MAX};
 int min_limits[6]={INDEX_MIN,MIDDLE_MIN,RING_MIN,LITTLE_MIN ,THUMB_MIN,THUMB2_MIN};
 
@@ -356,6 +356,19 @@ void send_can_statup_command()
     can_send(0x281,data);
 }
 
+int all_fingers_reached_target(uint16_t * feeback_values,uint32_t *target_position , int threshold)
+{
+	int i=0;
+	for(i=0 ; i<JOINT_COUNT ; i++ )
+	{
+		if(abs(target_position[i]-feeback_values[i])>threshold)
+		return 0;
+	}
+
+return 1;
+
+}
+
 void run_pid_for_all_fingers()
 {
 	static int step = 0;
@@ -366,6 +379,14 @@ void run_pid_for_all_fingers()
 	return  ;
 	}
 	read_adc(values);
+	if(all_fingers_reached_target(values,target_position,error_tolerance))
+	{
+
+		pid_enabled= 0;
+		set_motor_speed(7,0);
+		return;
+	}
+
 
 	 int phase = step / 10;
 
@@ -373,6 +394,7 @@ void run_pid_for_all_fingers()
 	 {
 		 case 0:
 				toggle_test_pin();
+
 			 set_motor_speed(INDEX_FINGER , do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
 			 break;
 		 case 1:
@@ -391,8 +413,6 @@ void run_pid_for_all_fingers()
 		 case 4:
 			 set_motor_speed(THUMB_FINGER,do_pid(target_position[THUMB_FINGER],values[THUMB_FEEDBACK_CHANNEL],&pid_element[THUMB_FINGER]));
 
-
-
 		 break;
 		 case 5:
 
@@ -407,6 +427,7 @@ void run_pid_for_all_fingers()
 	 {
 		 step = 0;
 	 }
+
 
 }
 
