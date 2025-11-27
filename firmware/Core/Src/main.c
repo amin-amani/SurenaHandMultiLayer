@@ -115,7 +115,7 @@ void SysTick_Initialize(uint32_t ticks)
 
 void systick_interrupt_handler()
 {
-//every 20ms
+	//every 1.67ms
 	run_pid_for_all_fingers();
 }
 

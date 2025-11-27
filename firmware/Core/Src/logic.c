@@ -98,7 +98,9 @@ void logic_init()
 void logic_loop()
 {
 
-    update_presure_sensors();
+    update_presure_sensors();//53ms or 3ms
+	toggle_test_pin();
+
     
 //    if(control_trigger == 1)
 ////    {
@@ -114,20 +116,21 @@ uint8_t get_pid_status(){
     return pid_enabled;
 }
 
-uint8_t get_trigger_status(){
+uint8_t get_trigger_status()
+{
     return control_trigger;
 }
 
 void update_presure_sensors()
 {
-    int i;
-    for(i=0;i<SENSOR_COUNT;i++)
-    {
-    	bmp_sensor_value[i].pressure = sensor_read_pressure(i+1);
-    	bmp_sensor_value[i].temperature = sensor_read_temperature(i+1);
-//        printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp_sensor_value[i].pressure,bmp_sensor_value[i].temperature);
-        delay_ms(50);
-    }
+
+	static int  i = 0;
+
+	bmp_sensor_value[i].pressure	= sensor_read_pressure(i+1);
+	bmp_sensor_value[i].temperature = sensor_read_temperature(i+1);
+	i++;
+
+	if(i >= SENSOR_COUNT) i = 0;
 }
 
 int motor_move(uint32_t id , uint8_t*data)
@@ -369,7 +372,7 @@ return 1;
 
 }
 
-void run_pid_for_all_fingers()
+void run_pid_for_all_fingers()//every 1.67ms
 {
 	static int step = 0;
 	uint16_t values[JOINT_COUNT] = {0};
@@ -393,7 +396,7 @@ void run_pid_for_all_fingers()
 	 switch (phase)
 	 {
 		 case 0:
-				toggle_test_pin();
+
 
 			 set_motor_speed(INDEX_FINGER , do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
 			 break;
