@@ -98,7 +98,7 @@ void logic_init()
 void logic_loop()
 {
 
-//    update_presure_sensors();
+    update_presure_sensors();
     
 //    if(control_trigger == 1)
 ////    {
@@ -126,7 +126,7 @@ void update_presure_sensors()
     	bmp_sensor_value[i].pressure = sensor_read_pressure(i+1);
     	bmp_sensor_value[i].temperature = sensor_read_temperature(i+1);
 //        printf("sensor num:%d pressure=%f  temp=%f \n",i,bmp_sensor_value[i].pressure,bmp_sensor_value[i].temperature);
-        delay_ms(100);
+        delay_ms(50);
     }
 }
 
@@ -269,8 +269,8 @@ int set_servo_goal_position(uint32_t id,uint8_t*data)
 	position[2] = data[3];
 
 	if (trigger == 1) set_servo_position(position);
-	printf("set servo pos %d %d %d (trigger=%d)\n", 
-		   position[0], position[1], position[2], trigger);
+//	printf("set servo pos %d %d %d (trigger=%d)\n",
+//		   position[0], position[1], position[2], trigger);
 	return 0;
 }
 
