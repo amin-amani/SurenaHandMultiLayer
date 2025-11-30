@@ -20,6 +20,8 @@
 #include "bmp280.h"
 #endif
 
+#define RIGHT_HAND
+//#define LEFT_HAND
 
 
 
@@ -43,6 +45,13 @@
 
 
 
+#define SHARED_CAN_ID (0x283)
+
+#ifdef RIGHT_HAND
+#define DEVICE_CAN_ID (0x281)
+#else
+#define DEVICE_CAN_ID (0x282)
+#endif
 
 #define INDEX_FINGER    (0) //correct index ok
 #define MIDDLE_FINGER   (1) //ok
@@ -60,6 +69,7 @@
 
 #define JOINT_COUNT 6
 #define SENSOR_COUNT 6
+
 
 // sensor p 0 index finger
 // sensor p 2 ring finger
@@ -95,7 +105,4 @@ void logic_register_hw_pin(void (*toggle_test_pin_callback)(void));
 uint8_t get_pid_status();
 uint8_t get_trigger_status();
 
-static void control_logic_loop(void);
-static uint8_t is_motor_at_target_position(uint8_t motor_index, uint16_t current_adc_value);
-static uint8_t is_pressure_limit_reached(uint8_t sensor_index);
 #endif /* INC_LOGIC_H_ */

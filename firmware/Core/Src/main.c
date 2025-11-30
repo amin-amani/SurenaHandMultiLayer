@@ -233,6 +233,13 @@ int main(void)
    else{
  	  printf("can start ok!!!!!\n");
    }
+
+#ifdef RIGHT_HAND
+	  printf("right hand\n");
+#else
+	  printf("left hand\n");
+#endif
+
   HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADCResult, 6);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
