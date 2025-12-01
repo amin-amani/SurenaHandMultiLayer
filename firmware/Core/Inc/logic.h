@@ -20,11 +20,11 @@
 #include "bmp280.h"
 #endif
 
-#define RIGHT_HAND
-//#define LEFT_HAND
+//#define RIGHT_HAND
+#define LEFT_HAND
 
 
-
+#ifdef RIGHT_HAND
 #define INDEX_MAX 1570 //open
 #define INDEX_MIN 840  //close
 
@@ -45,13 +45,34 @@
 
 
 
-#define SHARED_CAN_ID (0x283)
 
-#ifdef RIGHT_HAND
+
+
 #define DEVICE_CAN_ID (0x281)
 #else
-#define DEVICE_CAN_ID (0x282)
+
+#define INDEX_MIN 1417 //open open with -
+#define INDEX_MAX 1925  //close
+
+#define MIDDLE_MIN 2212 //open    open with +
+#define MIDDLE_MAX 2774  //close
+
+#define RING_MIN 1670  //open     open with -
+#define RING_MAX 2077  //close
+
+#define LITTLE_MIN 1373 //open   open with -
+#define LITTLE_MAX 1800 //close
+
+#define THUMB_MIN 1870 //open    open with -
+#define THUMB_MAX 2000 //close
+
+#define THUMB2_MIN 2669 //open    open with +
+#define THUMB2_MAX 3071 //close
+
+#define DEVICE_CAN_ID (0x281)
 #endif
+
+#define SHARED_CAN_ID (0x283)
 
 #define INDEX_FINGER    (0) //correct index ok
 #define MIDDLE_FINGER   (1) //ok
