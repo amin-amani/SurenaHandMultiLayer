@@ -285,8 +285,8 @@ int set_servo_goal_position(uint32_t id,uint8_t*data)
 	
 	uint8_t position[3];
 #ifdef RIGHT_HAND
-	position[1] = data[1];
-	position[0] = data[2];
+	position[0] = data[1];
+	position[1] = data[2];
 	position[2] = data[3];
 #else
 	position[0] = data[4];

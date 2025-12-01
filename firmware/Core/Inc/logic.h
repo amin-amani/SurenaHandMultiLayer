@@ -20,8 +20,8 @@
 #include "bmp280.h"
 #endif
 
-//#define RIGHT_HAND
-#define LEFT_HAND
+#define RIGHT_HAND
+//#define LEFT_HAND
 
 
 #ifdef RIGHT_HAND
@@ -69,7 +69,7 @@
 #define THUMB2_MIN 2669 //open    open with +
 #define THUMB2_MAX 3071 //close
 
-#define DEVICE_CAN_ID (0x281)
+#define DEVICE_CAN_ID (0x282)
 #endif
 
 #define SHARED_CAN_ID (0x283)
