@@ -129,14 +129,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 		if(step1 == 0)
 		{
 
-			GPIOB->ODR^=1<<7;
+			GPIOB->ODR |=1<<7;
 			TIM1->ARR = pwm1;
 			step1 = 1;
 		}
 		else if(step1 == 1)
 		{
 
-			GPIOB->ODR^=1<<7;
+			GPIOB->ODR &=~(1<<7);
 			TIM1->ARR = 19500-pwm1;
 			step1 = 0;
 		}
@@ -147,14 +147,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim1)
 		if(step2 == 0)
 		{
 
-			GPIOB->ODR^=1<<6;
+			GPIOB->ODR |=(1<<6);
 			TIM2->ARR = pwm2;
 			step2 = 1;
 		}
 		else if(step2 == 1)
 		{
 
-			GPIOB->ODR^=1<<6;
+			GPIOB->ODR&=~(1<<6);
 			TIM2->ARR = 19500-pwm2;
 			step2 = 0;
 		}

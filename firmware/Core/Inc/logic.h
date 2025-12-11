@@ -20,8 +20,8 @@
 #include "bmp280.h"
 #endif
 
-#define RIGHT_HAND
-//#define LEFT_HAND
+//#define RIGHT_HAND
+#define LEFT_HAND
 
 
 #ifdef RIGHT_HAND
