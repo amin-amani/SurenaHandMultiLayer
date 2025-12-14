@@ -26,8 +26,8 @@ int32_t do_pid(int32_t target_position, int32_t current_position, pid_element_ty
 
     command = (pid_elemets->kp * error) + (pid_elemets->kd * dterm) + (pid_elemets->ki * pid_elemets->i_term);
 
-    pid_elemets->prev_error = error;
 
+    pid_elemets->prev_error = error;
     if (command > pid_elemets->max_output) command = pid_elemets->max_output;
     if (command < pid_elemets->min_output) command = pid_elemets->min_output;
 

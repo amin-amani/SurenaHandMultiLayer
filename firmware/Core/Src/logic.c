@@ -437,6 +437,17 @@ return 1;
 
 }
 
+int all_finger_position_in_range(uint16_t *current_position)
+{
+
+if(current_position[0]<INDEX_MIN || current_position[0] >INDEX_MAX)return -1;
+if(current_position[1]<MIDDLE_MIN || current_position[1] >MIDDLE_MAX)return -1;
+if(current_position[2]<RING_MIN || current_position[2] >RING_MAX)return -1;
+if(current_position[3]<LITTLE_MIN || current_position[3] >LITTLE_MAX)return -1;
+if(current_position[4]<THUMB_MIN || current_position[4] >THUMB_MAX)return -1;
+if(current_position[5]<THUMB2_MIN || current_position[5] >THUMB2_MAX)return -1;
+return 0;
+}
 void run_pid_for_all_fingers()
 {
 	static int step = 0;
@@ -452,6 +463,12 @@ void run_pid_for_all_fingers()
 	if(all_fingers_reached_target(values,target_position,error_tolerance))
 	{
 
+		pid_enabled= 0;
+		set_motor_speed(7,0);
+		return;
+	}
+	if(all_finger_position_in_range(values)<0)
+	{
 		pid_enabled= 0;
 		set_motor_speed(7,0);
 		return;
