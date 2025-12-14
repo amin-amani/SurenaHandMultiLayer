@@ -204,7 +204,7 @@ int set_finger_goal_position_amani(uint32_t id,uint8_t*data)
     printf("set pos[%d] = %d\n",data[1],target_position[data[1]]);
     return 0;
 }
-
+#ifdef RIGHT_HAND
 int set_finger_goal_position(uint32_t id,uint8_t*data)
 {
 	// Data Format: [command_id, motor0, motor1, motor2, motor3, motor4, motor5, control_data]
@@ -249,6 +249,43 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 	
 	return 0;
 }
+#else
+int set_finger_goal_position(uint32_t id,uint8_t*data)
+{
+	// Data Format: [command_id, motor0, motor1, motor2, motor3, motor4, motor5, control_data]
+	// Each motor value represents position for that finger
+	if(id!=DEVICE_CAN_ID)return 0;
+	uint8_t control_data = data[7];
+
+	if (control_data != 0) pid_enabled = 1;
+
+	switch (control_data)
+	 {
+		 case 1:
+			 if (data[1] != 0) target_position[INDEX_FINGER]  = INDEX_MAX - data[1] * (INDEX_MAX-INDEX_MIN) / 255;
+			 if (data[2] != 0) target_position[MIDDLE_FINGER] = MIDDLE_MAX - data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
+			 if (data[3] != 0) target_position[RING_FINGER]   = RING_MAX - data[3] * (RING_MAX-RING_MIN) / 255;
+			 if (data[4] != 0) target_position[LITTLE_FINGER] = LITTLE_MAX - data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
+			 if (data[5] != 0) target_position[THUMB_FINGER]  = THUMB_MAX - data[5] * (THUMB_MAX-THUMB_MIN) / 255;
+			 if (data[6] != 0) target_position[THUMB2_FINGER] = THUMB2_MAX - data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
+			 break;
+
+		 case 2:
+
+			 break;
+
+		 case 3:
+
+			 break;
+
+		 default:
+			 break;
+	 }
+
+	return 0;
+}
+
+#endif
 
 int set_pressure_limits(uint32_t id,uint8_t*data)
 {
@@ -323,11 +360,16 @@ void init_pid_elements()
 		pid_element[i].max_output=1900;
 		pid_element[i].min_output=-1900;
     }
+#ifdef RIGHT_HAND
     pid_element[0].kp *= -1;
     pid_element[2].kp *= -1;
     pid_element[3].kp *= -1;
     pid_element[4].kp *= -1;
     pid_element[5].kp *= -1;
+#else
+    pid_element[1].kp *= -1;
+    pid_element[5].kp *= -1;
+#endif
 }
 
 void can_data_received(uint32_t id,uint8_t *data)
