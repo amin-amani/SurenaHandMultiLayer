@@ -34,7 +34,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define FILTER_MEM_COUNT (5)
+#if (FILTER_MEM_COUNT % 2) == 0
+#error "FILTER_MEM_COUNT must be odd for median filter"
+#endif
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -794,10 +797,63 @@ int _write(int file, char *ptr, int len)
 	return len;
 }
 
-void hw_read_adc(uint16_t*value)
+static void sort_uint16(uint16_t *arr, uint8_t size)
 {
-	 memcpy(value, ADCResult, 6 * sizeof(uint16_t));
+    for (uint8_t i = 1; i < size; i++)
+    {
+        uint16_t key = arr[i];
+        int8_t j = i - 1;
 
+        while (j >= 0 && arr[j] > key)
+        {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+void filter_adc_values(uint16_t *filtered_value,
+                       uint16_t adc_raw_value[6][FILTER_MEM_COUNT])
+{
+    uint16_t temp[FILTER_MEM_COUNT];
+
+    for (int ch = 0; ch < 6; ch++)
+    {
+
+        for (int i = 0; i < FILTER_MEM_COUNT; i++)
+        {
+            temp[i] = adc_raw_value[ch][i];
+        }
+
+
+        sort_uint16(temp, FILTER_MEM_COUNT);
+
+
+        filtered_value[ch] = temp[FILTER_MEM_COUNT / 2];
+    }
+}
+
+void hw_read_adc(uint16_t *value)
+{
+    static uint16_t filter_memory[6][FILTER_MEM_COUNT];
+    static uint16_t adc_filtered[6] = {0};
+    static int index = 0;
+
+    for (int channel = 0; channel < 6; channel++)
+    {
+        filter_memory[channel][index] = ADCResult[channel];
+    }
+
+    index++;
+
+    if (index == FILTER_MEM_COUNT)
+    {
+        index = 0;
+        filter_adc_values(adc_filtered, filter_memory);
+    }
+
+    memcpy(value, adc_filtered, 6 * sizeof(uint16_t));
 }
 
 int hw_can_send(uint32_t id,uint8_t *data)
