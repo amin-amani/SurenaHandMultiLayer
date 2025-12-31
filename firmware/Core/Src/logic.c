@@ -266,7 +266,7 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 			 if (data[2] != 0) target_position[MIDDLE_FINGER] = MIDDLE_MAX - data[2] * (MIDDLE_MAX-MIDDLE_MIN) / 255;
 			 if (data[3] != 0) target_position[RING_FINGER]   = RING_MAX - data[3] * (RING_MAX-RING_MIN) / 255;
 			 if (data[4] != 0) target_position[LITTLE_FINGER] = LITTLE_MAX - data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
-			 if (data[5] != 0) target_position[THUMB_FINGER]  = THUMB_MAX - data[5] * (THUMB_MAX-THUMB_MIN) / 255;
+			 if (data[5] != 0) target_position[THUMB_FINGER]  = THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
 			 if (data[6] != 0) target_position[THUMB2_FINGER] = THUMB2_MAX - data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
 			 break;
 
@@ -368,6 +368,7 @@ void init_pid_elements()
     pid_element[5].kp *= -1;
 #else
     pid_element[1].kp *= -1;
+    pid_element[4].kp *= -1;
     pid_element[5].kp *= -1;
 #endif
 }
@@ -443,7 +444,7 @@ int all_finger_position_in_range(uint16_t *current_position)
 if(current_position[0]<INDEX_MIN || current_position[0] >INDEX_MAX)return -1;
 if(current_position[1]<MIDDLE_MIN || current_position[1] >MIDDLE_MAX)return -1;
 if(current_position[2]<RING_MIN || current_position[2] >RING_MAX)return -1;
-if(current_position[3]<LITTLE_MIN || current_position[3] >LITTLE_MAX)return -1;
+//if(current_position[3]<LITTLE_MIN || current_position[3] >LITTLE_MAX)return -1;
 if(current_position[4]<THUMB_MIN || current_position[4] >THUMB_MAX)return -1;
 if(current_position[5]<THUMB2_MIN || current_position[5] >THUMB2_MAX)return -1;
 return 0;
@@ -467,12 +468,12 @@ void run_pid_for_all_fingers()
 		set_motor_speed(7,0);
 		return;
 	}
-	if(all_finger_position_in_range(values)<0)
-	{
-		pid_enabled= 0;
-		set_motor_speed(7,0);
-		return;
-	}
+//	if(all_finger_position_in_range(values)<0)
+//	{
+//		pid_enabled= 0;
+//		set_motor_speed(7,0);
+//		return;
+//	}
 
 	 int phase = step / 10;
 

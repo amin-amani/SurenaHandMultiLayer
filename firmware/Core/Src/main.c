@@ -836,24 +836,24 @@ void filter_adc_values(uint16_t *filtered_value,
 
 void hw_read_adc(uint16_t *value)
 {
-    static uint16_t filter_memory[6][FILTER_MEM_COUNT];
-    static uint16_t adc_filtered[6] = {0};
-    static int index = 0;
+//    static uint16_t filter_memory[6][FILTER_MEM_COUNT];
+//    static uint16_t adc_filtered[6] = {2000,2000,2000,2000,2000,2000};
+//    static int index = 0;
+//
+//    for (int channel = 0; channel < 6; channel++)
+//    {
+//        filter_memory[channel][index] = ADCResult[channel];
+//    }
+//
+//    index++;
+//
+//    if (index == FILTER_MEM_COUNT)
+//    {
+//        index = 0;
+//        filter_adc_values(adc_filtered, filter_memory);
+//    }
 
-    for (int channel = 0; channel < 6; channel++)
-    {
-        filter_memory[channel][index] = ADCResult[channel];
-    }
-
-    index++;
-
-    if (index == FILTER_MEM_COUNT)
-    {
-        index = 0;
-        filter_adc_values(adc_filtered, filter_memory);
-    }
-
-    memcpy(value, adc_filtered, 6 * sizeof(uint16_t));
+    memcpy(value, ADCResult, 6 * sizeof(uint16_t));
 }
 
 int hw_can_send(uint32_t id,uint8_t *data)
