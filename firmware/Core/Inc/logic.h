@@ -25,19 +25,19 @@
 
 
 #ifdef RIGHT_HAND
-#define INDEX_MAX 1595 //open
-#define INDEX_MIN 1331  //close
+#define INDEX_MAX 1700 //open
+#define INDEX_MIN 1331  //close need +
 
-#define MIDDLE_MAX 2870 //open
-#define MIDDLE_MIN 2473  //close
+#define MIDDLE_MAX 2900 //open
+#define MIDDLE_MIN 2473  //close need -
 
-#define RING_MAX 750  //open
-#define RING_MIN 282  //close
+#define RING_MAX 700  //open
+#define RING_MIN 282  //close need +
 
 #define LITTLE_MAX 2642 //open
 #define LITTLE_MIN 2413 //close
 
-#define THUMB_MAX 2155 //open
+#define THUMB_MAX 1245 //open
 #define THUMB_MIN 1773 //close
 
 #define THUMB2_MAX 3232 //open
