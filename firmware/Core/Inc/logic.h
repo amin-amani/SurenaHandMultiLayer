@@ -25,23 +25,23 @@
 
 
 #ifdef RIGHT_HAND
-#define INDEX_MAX 1700 //open
-#define INDEX_MIN 1331  //close need +
+#define INDEX_MAX 1530 //open
+#define INDEX_MIN 1088  //close need +
 
-#define MIDDLE_MAX 2900 //open
-#define MIDDLE_MIN 2473  //close need -
+#define MIDDLE_MAX 2430 //open
+#define MIDDLE_MIN 2020  //close need -
 
-#define RING_MAX 700  //open
-#define RING_MIN 282  //close need +
+#define RING_MAX 650  //open
+#define RING_MIN 250  //close need +
 
-#define LITTLE_MAX 2642 //open
-#define LITTLE_MIN 2413 //close
+#define LITTLE_MAX 2620 //open need -
+#define LITTLE_MIN 2320 //close
 
-#define THUMB_MAX 1245 //open
+#define THUMB_MAX 2100 //open need -
 #define THUMB_MIN 1773 //close
 
-#define THUMB2_MAX 3232 //open
-#define THUMB2_MIN 2575 //close
+#define THUMB2_MAX 3350 //open need -
+#define THUMB2_MIN 2470 //close
 
 
 
@@ -51,23 +51,23 @@
 #define DEVICE_CAN_ID (0x281)
 #else
 
-#define INDEX_MIN 1335 //open open with -
-#define INDEX_MAX 2111  //close
+#define INDEX_MIN 1270 //open open with -
+#define INDEX_MAX 1950  //close
 
-#define MIDDLE_MIN 2124 //open    open with +
-#define MIDDLE_MAX 2922  //close
+#define MIDDLE_MIN 1992 //open    open with +
+#define MIDDLE_MAX 2790  //close
 
-#define RING_MIN 1590  //open     open with -
-#define RING_MAX 2157  //close
+#define RING_MIN 1641  //open     open with -
+#define RING_MAX 2045  //close
 
-#define LITTLE_MIN 2285 //open   open with -
-#define LITTLE_MAX 2750 //close
+#define LITTLE_MIN 2677 //open   open with -
+#define LITTLE_MAX 2949 //close
 
-#define THUMB_MAX 3083 //open
-#define THUMB_MIN 2790 //close    open with -
+#define THUMB_MAX 3095 //open    open with -
+#define THUMB_MIN 2763 //close
 
-#define THUMB2_MIN 2690 //open    open with +
-#define THUMB2_MAX 3037 //close
+#define THUMB2_MIN 2700 //open    open with +
+#define THUMB2_MAX 3100 //close
 
 #define DEVICE_CAN_ID (0x282)
 #endif
