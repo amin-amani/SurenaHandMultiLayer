@@ -20,11 +20,12 @@
 #include "bmp280.h"
 #endif
 
-#define RIGHT_HAND
-//#define LEFT_HAND
+//#define RIGHT_HAND
+#define LEFT_HAND
 
 
 #ifdef RIGHT_HAND
+<<<<<<< HEAD
 #define INDEX_MAX 1530 //open
 #define INDEX_MIN 1088  //close need +
 
