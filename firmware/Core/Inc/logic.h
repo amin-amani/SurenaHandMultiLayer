@@ -52,16 +52,16 @@
 #define DEVICE_CAN_ID (0x281)
 #else
 
-#define INDEX_MIN 1270 //open open with -
-#define INDEX_MAX 1950  //close
+#define INDEX_MIN 1380 //open open with -
+#define INDEX_MAX 2013  //close
 
-#define MIDDLE_MIN 1992 //open    open with +
-#define MIDDLE_MAX 2790  //close
+#define MIDDLE_MIN 2220 //open    open with +
+#define MIDDLE_MAX 2815  //close
 
-#define RING_MIN 1641  //open     open with -
-#define RING_MAX 2045  //close
+#define RING_MIN 1580  //open     open with -
+#define RING_MAX 2057  //close
 
-#define LITTLE_MIN 2677 //open   open with -
+#define LITTLE_MIN 2540 //open   open with -
 #define LITTLE_MAX 2949 //close
 
 #define THUMB_MAX 3095 //open    open with -
@@ -70,7 +70,7 @@
 #define THUMB2_MIN 2700 //open    open with +
 #define THUMB2_MAX 3100 //close
 
-#define DEVICE_CAN_ID (0x282)
+#define DEVICE_CAN_ID (0x281)
 #endif
 
 #define SHARED_CAN_ID (0x283)

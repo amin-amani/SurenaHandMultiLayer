@@ -30,6 +30,6 @@ int32_t do_pid(int32_t target_position, int32_t current_position, pid_element_ty
     pid_elemets->prev_error = error;
     if (command > pid_elemets->max_output) command = pid_elemets->max_output;
     if (command < pid_elemets->min_output) command = pid_elemets->min_output;
-
+    printf("t %d %d %d\n",target_position,current_position,(int32_t)command);
     return (int32_t)command;
 }

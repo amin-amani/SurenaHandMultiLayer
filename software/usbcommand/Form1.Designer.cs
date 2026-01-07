@@ -90,11 +90,14 @@
             this.btn_read_pressure = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.lab_pressure_values = new System.Windows.Forms.Label();
+            this.Num_can_id = new System.Windows.Forms.NumericUpDown();
+            this.label14 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trk_motor_position)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_motor_index)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_motor_position)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_set_position)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Num_can_id)).BeginInit();
             this.SuspendLayout();
             // 
             // btnfind
@@ -705,11 +708,43 @@
             this.lab_pressure_values.TabIndex = 78;
             this.lab_pressure_values.Text = "0 0 0 0 0 0";
             // 
+            // Num_can_id
+            // 
+            this.Num_can_id.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.Num_can_id.Hexadecimal = true;
+            this.Num_can_id.Location = new System.Drawing.Point(331, 51);
+            this.Num_can_id.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.Num_can_id.Name = "Num_can_id";
+            this.Num_can_id.Size = new System.Drawing.Size(76, 31);
+            this.Num_can_id.TabIndex = 79;
+            this.Num_can_id.Value = new decimal(new int[] {
+            641,
+            0,
+            0,
+            0});
+            this.Num_can_id.ValueChanged += new System.EventHandler(this.Num_can_id_ValueChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(226, 57);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(82, 25);
+            this.label14.TabIndex = 80;
+            this.label14.Text = "CAN ID";
+            // 
             // frmmain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1163, 840);
+            this.ClientSize = new System.Drawing.Size(1163, 749);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.Num_can_id);
             this.Controls.Add(this.lab_pressure_values);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.btn_read_pressure);
@@ -749,6 +784,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.num_motor_index)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_motor_position)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_set_position)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Num_can_id)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -816,6 +852,8 @@
         private System.Windows.Forms.Button btn_read_pressure;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label lab_pressure_values;
+        private System.Windows.Forms.NumericUpDown Num_can_id;
+        private System.Windows.Forms.Label label14;
     }
 }
 

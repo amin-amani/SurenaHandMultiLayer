@@ -50,6 +50,7 @@ namespace usbcommand
         ///   True if the device is detected, False if not detected.
         ///  </returns>
         bool buffer_ovf = false;
+        
         private Boolean FindTheHid()
         {
             Boolean deviceFound = false;
@@ -972,7 +973,7 @@ public static byte[] StrToByteArray(string str)
             input[0] = 4;
             input[1] = (byte)Convert.ToInt32(num_motor_index.Value);
 
-            can_send(0x281, input);
+            can_send((UInt32)Num_can_id.Value, input);
         }
 
         private void trk_motor_position_Scroll(object sender, EventArgs e)
@@ -989,7 +990,7 @@ public static byte[] StrToByteArray(string str)
             input[5] = (byte)((trk_motor_position.Value >> 24) & 0xff);
 
 
-            can_send(0x281, input);
+            can_send((UInt32)Num_can_id.Value, input);
             num_motor_position.Value = trk_motor_position.Value;
 
         }
@@ -1001,8 +1002,8 @@ public static byte[] StrToByteArray(string str)
             Byte[] rx_data = new Byte[65];
             tx_data[0] = 2;
             tx_data[1] = channel;
-           
-            can_send(0x281, tx_data);
+
+            can_send((UInt32)Num_can_id.Value, tx_data);
             Thread.Sleep(10);
             for (int i = 0; i < 200; i++)
             {
@@ -1030,7 +1031,7 @@ public static byte[] StrToByteArray(string str)
             tx_data[0] = 5;
             tx_data[1] = channel;
 
-            can_send(0x281, tx_data);
+            can_send((UInt32)Num_can_id.Value, tx_data);
             Thread.Sleep(10);
             for (int i = 0; i < 200; i++)
             {
@@ -1058,7 +1059,7 @@ public static byte[] StrToByteArray(string str)
             tx_data[3] = (byte)(((int)value >> 8) & 0xff);
             tx_data[4] = (byte)(((int)value >> 16) & 0xff);
             tx_data[5] = (byte)(((int)value >> 24) & 0xff);
-            can_send(0x281, tx_data);
+            can_send((UInt32)Num_can_id.Value, tx_data);
 
             return 0;
         }
@@ -1093,6 +1094,11 @@ public static byte[] StrToByteArray(string str)
             lab_pressure_values.Text += " " + read_bmp_channel((byte)3).ToString();
             lab_pressure_values.Text += " " + read_bmp_channel((byte)4).ToString();
             lab_pressure_values.Text += " " + read_bmp_channel((byte)5).ToString();
+        }
+
+        private void Num_can_id_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
