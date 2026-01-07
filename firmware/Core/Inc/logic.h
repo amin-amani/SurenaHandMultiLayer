@@ -25,7 +25,7 @@
 
 
 #ifdef RIGHT_HAND
-<<<<<<< HEAD
+
 #define INDEX_MAX 1530 //open
 #define INDEX_MIN 1088  //close need +
 
@@ -70,7 +70,7 @@
 #define THUMB2_MIN 2700 //open    open with +
 #define THUMB2_MAX 3100 //close
 
-#define DEVICE_CAN_ID (0x281)
+#define DEVICE_CAN_ID (0x282)
 #endif
 
 #define SHARED_CAN_ID (0x283)
