@@ -54,7 +54,9 @@ static uint8_t control_data=0;
 const int error_tolerance = 20;
 int max_limits[6]={INDEX_MAX,MIDDLE_MAX,RING_MAX,LITTLE_MAX,THUMB_MAX,THUMB2_MAX};
 int min_limits[6]={INDEX_MIN,MIDDLE_MIN,RING_MIN,LITTLE_MIN ,THUMB_MIN,THUMB2_MIN};
-
+#define SENSOR_FILTER_MEM_COUNT (7)
+float pressure_offset_mem[SENSOR_COUNT][SENSOR_FILTER_MEM_COUNT];
+float pressure_offset[SENSOR_COUNT];
 const INT_COMMAND_TYPE command_list[] =
 {
     {0, set_finger_goal_position_amani},
@@ -114,16 +116,83 @@ uint8_t get_trigger_status()
     return control_data;
 }
 
+static void sort_float(float *arr, uint8_t size)
+{
+    for (uint8_t i = 1; i < size; i++)
+    {
+        float key = arr[i];
+        int8_t j = i - 1;
+
+
+        while (j >= 0 && (arr[j] - key) > 1e-6f)  // More robust
+        {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+static void filter_float_values(float *filtered_value, float sen_raw_value[SENSOR_COUNT][SENSOR_FILTER_MEM_COUNT])
+{
+    float temp[SENSOR_FILTER_MEM_COUNT];
+
+    for (int ch = 0; ch < SENSOR_COUNT; ch++)
+    {
+
+        for (int i = 0; i < SENSOR_FILTER_MEM_COUNT; i++)
+        {
+            temp[i] = sen_raw_value[ch][i];
+        }
+
+        sort_float(temp, SENSOR_FILTER_MEM_COUNT);
+
+
+        filtered_value[ch] = temp[SENSOR_FILTER_MEM_COUNT / 2];
+    }
+}
+
 void update_presure_sensors()
 {
 
-	static int  i = 0;
+    static uint8_t sensor_idx = 0;
+    static uint8_t sample_idx = 0;
+    static uint8_t offset_ready = 0;
 
-	bmp_sensor_value[i].pressure	= sensor_read_pressure(i+1);
-//	bmp_sensor_value[i].temperature = sensor_read_temperature(i+1);
-	i++;
+    bmp_sensor_value[sensor_idx].pressure = sensor_read_pressure(sensor_idx + 1);
 
-	if(i >= SENSOR_COUNT) i = 0;
+    if (!offset_ready)
+    {
+        pressure_offset_mem[sensor_idx][sample_idx] = bmp_sensor_value[sensor_idx].pressure;
+
+        sensor_idx++;
+
+        if (sensor_idx >= SENSOR_COUNT)
+        {
+            sensor_idx = 0;
+            sample_idx++;
+        }
+
+        if (sample_idx >= SENSOR_FILTER_MEM_COUNT)
+        {
+            filter_float_values(pressure_offset, pressure_offset_mem);
+            printf("pressure offset %8.3f %8.3f %8.3f %8.3f %8.3f \n",
+            		pressure_offset[0],
+            		pressure_offset[1],
+					pressure_offset[2],
+					pressure_offset[3],
+					pressure_offset[4]
+																				   );
+            offset_ready = 1;
+        }
+
+        return;
+    }
+
+
+    sensor_idx++;
+    if (sensor_idx >= SENSOR_COUNT)
+        sensor_idx = 0;
 }
 
 int motor_move(uint32_t id , uint8_t*data)
@@ -268,6 +337,16 @@ int set_finger_goal_position(uint32_t id,uint8_t*data)
 			 if (data[4] != 0) target_position[LITTLE_FINGER] = LITTLE_MAX - data[4] * (LITTLE_MAX-LITTLE_MIN) / 255;
 			 if (data[5] != 0) target_position[THUMB_FINGER]  = THUMB_MIN + data[5] * (THUMB_MAX-THUMB_MIN) / 255;
 			 if (data[6] != 0) target_position[THUMB2_FINGER] = THUMB2_MAX - data[6] * (THUMB2_MAX-THUMB2_MIN) / 255;
+			 printf("com %d %d %d %d %d %d\n",
+					 target_position[INDEX_FINGER],
+					 target_position[MIDDLE_FINGER],
+					 target_position[RING_FINGER],
+					 target_position[LITTLE_FINGER],
+					 target_position[THUMB_FINGER],
+					 target_position[THUMB2_FINGER]
+
+
+			 );
 			 break;
 
 		 case 2:
