@@ -52,6 +52,7 @@ static uint32_t pressure_limits[SENSOR_COUNT];
 static uint8_t pid_enabled=0;
 static uint8_t control_data=0;
 const int error_tolerance = 20;
+const float pressure_tolerance = 1000.0f;
 int max_limits[6]={INDEX_MAX,MIDDLE_MAX,RING_MAX,LITTLE_MAX,THUMB_MAX,THUMB2_MAX};
 int min_limits[6]={INDEX_MIN,MIDDLE_MIN,RING_MIN,LITTLE_MIN ,THUMB_MIN,THUMB2_MIN};
 #define SENSOR_FILTER_MEM_COUNT (7)
@@ -517,6 +518,30 @@ return 1;
 
 }
 
+int all_fingers_reached_pressure(LOGIC_BMP_OUTPUT_TYPE pressure_sensor_value[SENSOR_COUNT], float pressure_offset[SENSOR_COUNT], float presure_threshold)
+{
+	for(i=0 ; i<SENSOR_COUNT ; i++ )
+	{
+		if((pressure_sensor_value[i].pressure - pressure_offset[i]) < presure_threshold)
+		{
+
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+int finger_reached_pressure(LOGIC_BMP_OUTPUT_TYPE pressure_sensor_value, float pressure_offset, float presure_threshold)
+{
+	if((pressure_sensor_value.pressure - pressure_offset) > presure_threshold)
+	{
+		return 0;
+	}
+
+	return 1;
+}
+
 int all_finger_position_in_range(uint16_t *current_position)
 {
 
@@ -540,9 +565,14 @@ void run_pid_for_all_fingers()
 	}
 	read_adc(values);
 	toggle_test_pin();
+	if(all_fingers_reached_pressure(bmp_sensor_value, pressure_offset, presure_tolerance))
+	{
+		pid_enabled= 0;
+		set_motor_speed(7,0);
+		return;
+	}
 	if(all_fingers_reached_target(values,target_position,error_tolerance))
 	{
-
 		pid_enabled= 0;
 		set_motor_speed(7,0);
 		return;
@@ -559,22 +589,28 @@ void run_pid_for_all_fingers()
 	 switch (phase)
 	 {
 		 case 0:
-			 set_motor_speed(INDEX_FINGER , do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
+			 set_motor_speed(INDEX_FINGER ,
+					 finger_reached_pressure(bmp_sensor_value[INDEX_FINGER], pressure_offset[INDEX_FINGER], presure_tolerance)*do_pid(target_position[INDEX_FINGER],values[INDEX_FINGER_FEEDBACK_CHANNEL]   , &pid_element[INDEX_FINGER]));
 			 break;
 		 case 1:
-			 set_motor_speed(MIDDLE_FINGER , do_pid(target_position[MIDDLE_FINGER],values[MIDDLE_FINGER_FEEDBACK_CHANNEL], &pid_element[MIDDLE_FINGER]));
+			 set_motor_speed(MIDDLE_FINGER ,
+					 finger_reached_pressure(bmp_sensor_value[MIDDLE_FINGER], pressure_offset[MIDDLE_FINGER], presure_tolerance)*do_pid(target_position[MIDDLE_FINGER],values[MIDDLE_FINGER_FEEDBACK_CHANNEL], &pid_element[MIDDLE_FINGER]));
 		 break;
 		 case 2:
-			 set_motor_speed(RING_FINGER   , do_pid(target_position[RING_FINGER]  , values[RING_FINGER_FEEDBACK_CHANNEL]   , &pid_element[RING_FINGER]));
+			 set_motor_speed(RING_FINGER   ,
+					 finger_reached_pressure(bmp_sensor_value[RING_FINGER], pressure_offset[RING_FINGER], presure_tolerance)*do_pid(target_position[RING_FINGER]  , values[RING_FINGER_FEEDBACK_CHANNEL]   , &pid_element[RING_FINGER]));
 		 break;
 		 case 3:
-			 set_motor_speed(LITTLE_FINGER , do_pid(target_position[LITTLE_FINGER], values[LITTLE_FINGER_FEEDBACK_CHANNEL] , &pid_element[LITTLE_FINGER]));
+			 set_motor_speed(LITTLE_FINGER ,
+					 finger_reached_pressure(bmp_sensor_value[LITTLE_FINGER], pressure_offset[LITTLE_FINGER], presure_tolerance)*do_pid(target_position[LITTLE_FINGER], values[LITTLE_FINGER_FEEDBACK_CHANNEL] , &pid_element[LITTLE_FINGER]));
 		 break;
 		 case 4:
-			 set_motor_speed(THUMB_FINGER,do_pid(target_position[THUMB_FINGER],values[THUMB_FEEDBACK_CHANNEL],&pid_element[THUMB_FINGER]));
+			 set_motor_speed(THUMB_FINGER,
+					 finger_reached_pressure(bmp_sensor_value[THUMB_FINGER], pressure_offset[THUMB_FINGER], presure_tolerance)*do_pid(target_position[THUMB_FINGER],values[THUMB_FEEDBACK_CHANNEL],&pid_element[THUMB_FINGER]));
 		 break;
 		 case 5:
-			 set_motor_speed(THUMB2_FINGER , do_pid(target_position[THUMB2_FINGER],values[THUMB2_FINGER_FEEDBACK_CHANNEL]   , &pid_element[THUMB2_FINGER]));
+			 set_motor_speed(THUMB2_FINGER ,
+					 finger_reached_pressure(bmp_sensor_value[THUMB_FINGER], pressure_offset[THUMB_FINGER], presure_tolerance)*do_pid(target_position[THUMB2_FINGER],values[THUMB2_FINGER_FEEDBACK_CHANNEL]   , &pid_element[THUMB2_FINGER]));
 		 break;
 		 default:
 			 break;
